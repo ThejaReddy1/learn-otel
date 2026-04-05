@@ -1,0 +1,25 @@
+python main.py
+D:\OTelInstrumentation\day-04\OpentelemetryLogging\main.py: 8: DeprecationWarning: Use ConsoleLogRecordExporter. Since logs are not stable yet this WILL be removed in future releases.
+  exporter = ConsoleLogExporter()  # Deprecated
+{
+    "body": "Strating the booking flight process",
+    "severity_number": 9,
+    "severity_text": "INFO",
+    "attributes": null,
+    "dropped_attributes": 0,
+    "timestamp": "2026-02-15T09:18:51.952057Z",
+    "observed_timestamp": "2026-02-15T09:18:51.952057Z",
+    "trace_id": "0x00000000000000000000000000000000",
+    "span_id": "0x0000000000000000",
+    "trace_flags": 0,
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    },
+    "event_name": ""
+}

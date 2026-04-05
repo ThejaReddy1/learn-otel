@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 4 — Exporters & Backends | OTel Learning</title>
+  <meta name="description" content="Connect telemetry to backends with OTLP, Prometheus, and trace-log correlation. Learn how data leaves your application and reaches observability platforms.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="header-logo"><span class="logo-icon">🔭</span><span>OTel Learning</span></a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a><a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html" class="active">Days</a><a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link" data-day="0"><span class="day-badge">0</span><span>Foundations</span><span class="check-icon">✓</span></a>
+      <a href="day-01.html" class="sidebar-link" data-day="1"><span class="day-badge">1</span><span>OTel Basics</span><span class="check-icon">✓</span></a>
+      <a href="day-02.html" class="sidebar-link" data-day="2"><span class="day-badge">2</span><span>Instrumentation</span><span class="check-icon">✓</span></a>
+      <a href="day-03.html" class="sidebar-link" data-day="3"><span class="day-badge">3</span><span>Collector</span><span class="check-icon">✓</span></a>
+      <a href="day-04.html" class="sidebar-link active" data-day="4"><span class="day-badge">4</span><span>Exporters</span><span class="check-icon">✓</span></a>
+      <a href="day-05.html" class="sidebar-link" data-day="5"><span class="day-badge">5</span><span>Pipelines</span><span class="check-icon">✓</span></a>
+      <a href="day-06.html" class="sidebar-link" data-day="6"><span class="day-badge">6</span><span>OTCA Concepts</span><span class="check-icon">✓</span></a>
+      <a href="day-07.html" class="sidebar-link" data-day="7"><span class="day-badge">7</span><span>Mini Project</span><span class="check-icon">✓</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link"><span class="day-badge">⚡</span><span>Quick Start</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Day 4</span>
+        </div>
+        <div class="page-day-label day-4">Day 4 — Export</div>
+        <h1 class="page-title">Exporters & Backends</h1>
+        <p class="page-description">
+          Telemetry is only useful when it can travel somewhere meaningful. OTLP, Prometheus, and backend-friendly 
+          pipelines are what connect local examples to real observability stacks.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <span style="font-size:0.78rem;color:var(--text-muted);background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);padding:4px 12px;border-radius:100px;">⏱ ~40 min hands-on</span>
+          <span style="font-size:0.78rem;color:var(--accent-orange);background:rgba(244,132,95,0.08);border:1px solid rgba(244,132,95,0.2);padding:4px 12px;border-radius:100px;">🟠 Intermediate</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <h2 id="learning-outcomes">Learning Outcomes</h2>
+        <ul>
+          <li>Export traces and logs with OTLP to the Collector</li>
+          <li>Correlate logs with traces — see how log entries carry trace context</li>
+          <li>Expose metrics for Prometheus scraping</li>
+        </ul>
+
+        <h2 id="modules">Modules</h2>
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">📡</div>
+            <div class="module-card-title">OTLP Exporting</div>
+            <div class="module-card-desc">Send traces and logs to the Collector via OTLP HTTP protocol.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🔗</div>
+            <div class="module-card-title">Trace-Log Correlation</div>
+            <div class="module-card-desc">Connect log entries with trace context for unified debugging.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📊</div>
+            <div class="module-card-title">Prometheus Exporter</div>
+            <div class="module-card-desc">Expose metrics in Prometheus format for scraping at /metrics.</div>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- OTLP EXPORTING MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="otlp-exporting">Module: OTLP Exporting</h2>
+        <p>OTLP (OpenTelemetry Protocol) is the <strong>standard wire format</strong> for sending telemetry. Until now, you've been using <code>ConsoleSpanExporter</code> to see traces in the terminal. In production, you use OTLP to send data to the Collector.</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 OTLP Endpoints</div>
+          <div class="callout-body">
+            <strong>gRPC:</strong> <code>localhost:4317</code> — binary protocol, most efficient<br>
+            <strong>HTTP:</strong> <code>localhost:4318/v1/traces</code> — works through proxies and firewalls<br><br>
+            Our examples use HTTP because it's easier to debug and requires fewer dependencies.
+          </div>
+        </div>
+
+        <h3>The Code</h3>
+        <p>This example sends both traces and logs to the Collector via OTLP. Notice how spans and logs are created in the same flow — the trace context is automatically attached to log records:</p>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — main.py (OTLP export)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>import logging
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry._logs import set_logger_provider, get_logger
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+
+# OTLP exporter for logs — sends to the Collector
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
+
+# --- Trace setup (console for visibility) ---
+exporter = ConsoleSpanExporter()
+span_processor = SimpleSpanProcessor(exporter)
+provider = TracerProvider()
+provider.add_span_processor(span_processor=span_processor)
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer("flight-booking", "0.1.2")
+
+# --- Log setup (OTLP to Collector) ---
+logger_provider = LoggerProvider()
+otlp_exporter = OTLPLogExporter(endpoint="http://localhost:4318/v1/logs")
+processor = BatchLogRecordProcessor(exporter=otlp_exporter, export_timeout_millis=5000)
+logger_provider.add_log_record_processor(processor)
+set_logger_provider(logger_provider=logger_provider)
+
+# Bridge Python logging to OTel
+handler = LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider)
+logging.basicConfig(handlers=[handler], level=logging.NOTSET)
+
+@tracer.start_as_current_span("Book Flight")
+def book_flight():
+    logging.info("Starting the booking flight process")
+    search_flights()
+    reserve_flight()
+
+@tracer.start_as_current_span("Search Flight")
+def search_flights():
+    logging.info("Searching for flights")
+
+@tracer.start_as_current_span("Reserve Flight")
+def reserve_flight():
+    logging.warning("Reserving flight")
+
+if __name__ == "__main__":
+    book_flight()</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🧠 What's happening here?</div>
+          <div class="callout-body">
+            <strong>Two exporters, two destinations:</strong><br>
+            • Traces → Console (so you can see them locally)<br>
+            • Logs → OTLP endpoint (sent to the Collector)<br><br>
+            In production, you'd typically send <em>everything</em> via OTLP to the Collector, and the Collector would route it to your backends (Jaeger, Grafana, etc.).
+          </div>
+        </div>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Start the Collector first</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>docker compose -f .\shared-resources\collector\docker-compose.yaml up -d</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Run the OTLP example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-04-exporters\otlp-exporting\main.py</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Inspect Collector logs</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>docker logs otel-collector</code></pre>
+            </div>
+            <p>You should see log records received through OTLP in the Collector output.</p>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- TRACE-LOG CORRELATION MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="trace-log-correlation">Module: Trace-Log Correlation</h2>
+        <p>When traces and logs are produced in the same flow, OpenTelemetry <strong>automatically attaches trace context</strong> to log records. This means you can click on a log entry in your backend and jump directly to the trace — or vice versa.</p>
+
+        <h3>The Code</h3>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — main.py (trace-log correlation)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>import logging
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry._logs import set_logger_provider, get_logger
+from opentelemetry.sdk._logs.export import ConsoleLogExporter, BatchLogRecordProcessor
+
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
+
+# Both traces and logs export to console — easy to compare
+trace_exporter = ConsoleSpanExporter()
+trace.set_tracer_provider(TracerProvider())
+trace.get_tracer_provider().add_span_processor(SimpleSpanProcessor(trace_exporter))
+tracer = trace.get_tracer("flight-booking", "0.1.2")
+
+logger_provider = LoggerProvider()
+log_exporter = ConsoleLogExporter()
+processor = BatchLogRecordProcessor(exporter=log_exporter, export_timeout_millis=5000)
+logger_provider.add_log_record_processor(processor)
+set_logger_provider(logger_provider=logger_provider)
+
+handler = LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider)
+logging.basicConfig(handlers=[handler], level=logging.NOTSET)
+
+@tracer.start_as_current_span("Book Flight")
+def book_flight():
+    logging.info("Starting the booking flight process")
+    search_flights()
+    reserve_flight()
+
+@tracer.start_as_current_span("Search Flight")
+def search_flights():
+    logging.info("Searching for flights")
+
+@tracer.start_as_current_span("Reserve Flight")
+def reserve_flight():
+    logging.warning("Reserving flight")
+
+if __name__ == "__main__":
+    book_flight()</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🔗 The Correlation Magic</div>
+          <div class="callout-body">
+            Look at the output — both spans and log records share the same <code>trace_id</code> and <code>span_id</code>. This is trace-log correlation in action. In a real backend (Grafana, Jaeger), clicking a log entry takes you directly to the trace, and clicking a span shows you the logs emitted during that operation.
+          </div>
+        </div>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Run the correlation example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-04-exporters\trace-log-correlation\main.py</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Compare trace_ids in the output</h4>
+            <p>Check the sample output file for a complete example: <code>output.json</code> in the same directory.</p>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- PROMETHEUS EXPORTER MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="prometheus">Module: Prometheus Exporter</h2>
+        <p>Prometheus works differently from OTLP. Instead of your app <strong>pushing</strong> data, Prometheus <strong>pulls</strong> (scrapes) metrics from an HTTP endpoint your app exposes. This is called the "pull model."</p>
+
+        <div class="diagram-box">
+          <div class="diagram-flow">
+            <div class="diagram-node">🖥️ Your App<br><small style="color:var(--text-muted)">Exposes /metrics</small></div>
+            <div class="diagram-arrow">←</div>
+            <div class="diagram-node">📊 Prometheus<br><small style="color:var(--text-muted)">Scrapes every N seconds</small></div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">📈 Dashboard<br><small style="color:var(--text-muted)">Grafana, etc.</small></div>
+          </div>
+        </div>
+
+        <h3>The Code</h3>
+        <p>This is a Flask app with full Prometheus metrics — counters, histograms, gauges, and up-down counters all in one service:</p>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — main.py (Prometheus exporter)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>import random, time, os, psutil
+from flask import Flask, request
+from opentelemetry.metrics import set_meter_provider, get_meter_provider, Observation
+from opentelemetry.sdk.metrics.view import ExplicitBucketHistogramAggregation, View
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
+from prometheus_client import start_http_server
+
+def configure_meter():
+    # Start a separate HTTP server for Prometheus to scrape
+    start_http_server(port=8000, addr="localhost")
+    reader = PrometheusMetricReader()
+
+    # Custom histogram buckets for request duration
+    buckets = [0.0, 20, 30, 60, 100, 250, 2000]
+    view = View(
+        instrument_name="total_request_duration",
+        aggregation=ExplicitBucketHistogramAggregation(boundaries=buckets)
+    )
+
+    provider = MeterProvider(
+        metric_readers=[reader],
+        resource=Resource.create(),
+        views=[view]
+    )
+    set_meter_provider(provider)
+    return get_meter_provider().get_meter(name="shopping-app", version="0.1.2")
+
+meter = configure_meter()
+app = Flask(__name__)
+
+# Counter — total requests by route and method
+requests_counter = meter.create_counter(
+    "http_requests_total",
+    description="Total number of requests processed",
+    unit="1"
+)
+
+# Up-Down Counter — concurrent requests in progress
+concurrent_requests = meter.create_up_down_counter(
+    "concurrent_requests",
+    description="Number of requests currently in progress",
+    unit="1"
+)
+
+# Observable Gauge — memory usage via callback
+process = psutil.Process(os.getpid())
+def memory_usage_callback(options):
+    mem_info = process.memory_info()
+    return [
+        Observation(mem_info.rss, {"type": "rss"}),
+        Observation(mem_info.vms, {"type": "vms"})
+    ]
+
+meter.create_observable_gauge(
+    "application_memory_usage",
+    description="Memory usage of application",
+    unit="By",
+    callbacks=[memory_usage_callback]
+)
+
+# Histogram — request duration
+total_request_duration = meter.create_histogram(
+    "total_request_duration",
+    description="Request Duration",
+    unit="ms"
+)
+
+@app.before_request
+def before_request():
+    request.start_time = time.time()
+    concurrent_requests.add(1)
+
+@app.after_request
+def after_request(response):
+    request_latency = (time.time() - request.start_time) * 100
+    concurrent_requests.add(-1)
+    total_request_duration.record(request_latency)
+    return response
+
+@app.get("/products")
+def get_products():
+    requests_counter.add(1, {"route": "/products", "method": request.method})
+    time.sleep(random.uniform(0.05, 1.5))
+    return "Get All Products"
+
+@app.get("/cart")
+def get_cart():
+    requests_counter.add(1, {"route": "/cart", "method": request.method})
+    time.sleep(random.uniform(0.05, 1.5))
+    return "Get Cart"
+
+if __name__ == "__main__":
+    app.run()</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🧠 All four metric types in one app</div>
+          <div class="callout-body">
+            <strong>Counter</strong> → <code>http_requests_total</code> — always goes up<br>
+            <strong>Up-Down Counter</strong> → <code>concurrent_requests</code> — goes up on request start, down on response<br>
+            <strong>Observable Gauge</strong> → <code>application_memory_usage</code> — read via callback when scraped<br>
+            <strong>Histogram</strong> → <code>total_request_duration</code> — tracks latency distribution
+          </div>
+        </div>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Run the Prometheus example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-04-exporters\prometheus-exporter\main.py</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Generate some traffic</h4>
+            <p>Visit <a href="http://127.0.0.1:5000/products" target="_blank">http://127.0.0.1:5000/products</a> and <a href="http://127.0.0.1:5000/cart" target="_blank">http://127.0.0.1:5000/cart</a> a few times.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Check the metrics endpoint</h4>
+            <p>Visit <a href="http://localhost:8000/metrics" target="_blank">http://localhost:8000/metrics</a> to see Prometheus-format metrics.</p>
+          </div>
+        </div>
+
+        <h3>Expected Output at /metrics</h3>
+        <div class="terminal-block">
+          <span class="output"># HELP http_requests_total_total Total number of requests processed<br>
+          # TYPE http_requests_total_total counter<br>
+          http_requests_total_total{route="/products",method="GET"} 3.0<br>
+          http_requests_total_total{route="/cart",method="GET"} 2.0<br><br>
+          # HELP concurrent_requests Number of requests currently in progress<br>
+          # TYPE concurrent_requests gauge<br>
+          concurrent_requests 0.0<br><br>
+          # HELP total_request_duration Request Duration<br>
+          # TYPE total_request_duration histogram<br>
+          total_request_duration_bucket{le="20.0"} 4<br>
+          total_request_duration_bucket{le="100.0"} 5</span>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            🔧 Troubleshooting
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <ul>
+              <li>Start the Collector before running OTLP examples.</li>
+              <li>For Prometheus output, keep the app running while you visit <code>http://localhost:8000/metrics</code>.</li>
+              <li>If export errors mention connection refusal, the Collector is not running or the endpoint is wrong.</li>
+              <li>If you only see spans or only logs in correlation, verify that both providers are configured before the functions run.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="checklist">Readiness Checklist</h2>
+        <ul class="checklist">
+          <li class="checklist-item">
+            <input type="checkbox" id="day4-otlp">
+            <label for="day4-otlp">I can export traces and logs using OTLP HTTP</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day4-batch">
+            <label for="day4-batch">I understand BatchSpanProcessor vs SimpleSpanProcessor</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day4-correlation">
+            <label for="day4-correlation">I understand how trace-log correlation works</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day4-prometheus">
+            <label for="day4-prometheus">I can expose metrics for Prometheus scraping</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day4-pull-vs-push">
+            <label for="day4-pull-vs-push">I know the difference between push (OTLP) and pull (Prometheus) models</label>
+          </li>
+        </ul>
+      </div>
+
+      <nav class="page-nav">
+        <a href="day-03.html" class="page-nav-link prev">
+          <span class="page-nav-label">← Previous</span>
+          <span class="page-nav-title">Day 3 — Collector</span>
+        </a>
+        <a href="day-05.html" class="page-nav-link next">
+          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-title">Day 5 — Pipelines</span>
+        </a>
+      </nav>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

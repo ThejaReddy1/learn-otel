@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenTelemetry Learning Path — Hands-On Observability in 8 Days</title>
+  <meta name="description" content="A beginner-friendly, day-wise OpenTelemetry learning path with hands-on traces, metrics, logs, the Collector, exporters, and OTCA study material.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="index.html" class="header-logo">
+      <span class="logo-icon">🔭</span>
+      <span>OTel Learning</span>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html">Days</a>
+      <a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <!-- Main Content (full width, no sidebar) -->
+  <main class="main-content full-width">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-bg-orb orb-1"></div>
+      <div class="hero-bg-orb orb-2"></div>
+      <div class="hero-bg-orb orb-3"></div>
+      
+      <span class="hero-badge">✦ Open Source Learning Path</span>
+      
+      <h1 class="hero-title">
+        Learn <span class="gradient-text">OpenTelemetry</span><br>
+        By Building
+      </h1>
+      
+      <p class="hero-subtitle">
+        A hands-on, 8-day journey from observability fundamentals to production-ready instrumentation. 
+        Traces, metrics, logs, the Collector, and OTCA concepts — all with runnable Python examples.
+      </p>
+      
+      <div class="hero-actions">
+        <a href="day-00.html" class="btn btn-primary">Start Day 0 →</a>
+        <a href="quick-start.html" class="btn btn-secondary">Quick Start</a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Why This Path</span>
+        <h2 class="section-title">Everything You Need to Get Started</h2>
+        <p class="section-subtitle">No prior observability experience needed. Each day builds on the last.</p>
+      </div>
+      
+      <div class="features-strip">
+        <div class="feature-item animate-on-scroll">
+          <div class="feature-icon">🧩</div>
+          <div class="feature-title">Day-wise Structure</div>
+          <div class="feature-desc">8 focused days, from foundations to a real-world mini project</div>
+        </div>
+        <div class="feature-item animate-on-scroll">
+          <div class="feature-icon">🐍</div>
+          <div class="feature-title">Python Examples</div>
+          <div class="feature-desc">Every concept includes runnable Python code you can try immediately</div>
+        </div>
+        <div class="feature-item animate-on-scroll">
+          <div class="feature-icon">🔎</div>
+          <div class="feature-title">Traces, Metrics, Logs</div>
+          <div class="feature-desc">All three observability signals covered with hands-on exercises</div>
+        </div>
+        <div class="feature-item animate-on-scroll">
+          <div class="feature-icon">📦</div>
+          <div class="feature-title">Collector & Pipelines</div>
+          <div class="feature-desc">Learn to receive, process, and route telemetry with the OTel Collector</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Day Cards -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">Learning Path</span>
+        <h2 class="section-title">Your 8-Day Journey</h2>
+        <p class="section-subtitle">Each day is self-contained. Start from Day 0 and build up, or jump to what you need.</p>
+      </div>
+
+      <div class="days-grid">
+        <!-- Day 0 -->
+        <a href="day-00.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-0">D0</div>
+          <div class="day-card-title">Foundations</div>
+          <div class="day-card-desc">Build a mental model for observability before touching any code. Understand logs, metrics, traces, and where OpenTelemetry fits.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">Observability</span>
+            <span class="module-tag">Three Signals</span>
+            <span class="module-tag">Mental Model</span>
+          </div>
+        </a>
+
+        <!-- Day 1 -->
+        <a href="day-01.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-1">D1</div>
+          <div class="day-card-title">OpenTelemetry Basics</div>
+          <div class="day-card-desc">Create your first tracer, open a span, and see code execution become a timeline. Learn resource attributes and metadata.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">Manual Instrumentation</span>
+            <span class="module-tag">Resource Attributes</span>
+          </div>
+        </a>
+
+        <!-- Day 2 -->
+        <a href="day-02.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-2">D2</div>
+          <div class="day-card-title">Instrumentation</div>
+          <div class="day-card-desc">Trace real HTTP calls, log meaningful events, and count what your application does. Manual, library, and auto approaches.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">API</span>
+            <span class="module-tag">Library</span>
+            <span class="module-tag">Auto</span>
+            <span class="module-tag">Metrics</span>
+            <span class="module-tag">Logging</span>
+          </div>
+        </a>
+
+        <!-- Day 3 -->
+        <a href="day-03.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-3">D3</div>
+          <div class="day-card-title">Collector Deep Dive</div>
+          <div class="day-card-desc">The Collector is the control point between your code and backends. Learn receivers, processors, exporters, and pipelines.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">Docker</span>
+            <span class="module-tag">Receivers</span>
+            <span class="module-tag">Pipelines</span>
+          </div>
+        </a>
+
+        <!-- Day 4 -->
+        <a href="day-04.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-4">D4</div>
+          <div class="day-card-title">Exporters & Backends</div>
+          <div class="day-card-desc">Connect your telemetry to the world. OTLP for traces and logs, Prometheus for metrics, and trace-log correlation.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">OTLP</span>
+            <span class="module-tag">Prometheus</span>
+            <span class="module-tag">Correlation</span>
+          </div>
+        </a>
+
+        <!-- Day 5 -->
+        <a href="day-05.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-5">D5</div>
+          <div class="day-card-title">Pipelines & Processors</div>
+          <div class="day-card-desc">Batching improves efficiency. Sampling reduces cost. Span processors decide how telemetry flows from creation to export.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">Span Processors</span>
+            <span class="module-tag">Sampling</span>
+          </div>
+        </a>
+
+        <!-- Day 6 -->
+        <a href="day-06.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-6">D6</div>
+          <div class="day-card-title">OTCA Concepts</div>
+          <div class="day-card-desc">Map certification concepts back to hands-on examples. Resource attributes, exporters, processors, context propagation — all connected.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">Study Map</span>
+            <span class="module-tag">Cert Prep</span>
+          </div>
+        </a>
+
+        <!-- Day 7 -->
+        <a href="day-07.html" class="day-card animate-on-scroll">
+          <div class="day-card-number day-7">D7</div>
+          <div class="day-card-title">Mini Project</div>
+          <div class="day-card-desc">Bring it all together. Trace a shopping cart flow, expose fitness metrics, and practice thinking in user journeys.</div>
+          <div class="day-card-modules">
+            <span class="module-tag">Shopping Cart</span>
+            <span class="module-tag">Fitness Service</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Mental Model Diagram -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-tag">The Big Picture</span>
+        <h2 class="section-title">How OpenTelemetry Works</h2>
+        <p class="section-subtitle">From application code to observability backends — the telemetry pipeline at a glance.</p>
+      </div>
+      
+      <div class="diagram-box animate-on-scroll">
+        <div class="diagram-flow">
+          <div class="diagram-node">🖥️ Your App</div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">📡 Instrumentation</div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">📦 Collector</div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">☁️ Backend</div>
+          <div class="diagram-arrow">→</div>
+          <div class="diagram-node">📊 Insights</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Start CTA -->
+    <section class="section" style="padding-bottom: 120px;">
+      <div class="section-header">
+        <span class="section-tag">Get Started</span>
+        <h2 class="section-title">Ready to Begin?</h2>
+        <p class="section-subtitle">Clone the repo, install dependencies, and start your learning journey.</p>
+      </div>
+      
+      <div style="max-width: 600px; margin: 0 auto;">
+        <div class="code-block" data-lang="shell">
+          <div class="code-header">
+            <span class="code-lang">shell</span>
+            <button class="code-copy-btn">Copy</button>
+          </div>
+          <pre><code>git clone https://github.com/your-username/OTelInstrumentation.git
+cd OTelInstrumentation
+py -m pip install -r shared-resources\python\requirements.txt</code></pre>
+        </div>
+        
+        <div style="text-align: center; margin-top: 32px;">
+          <a href="day-00.html" class="btn btn-primary" style="font-size: 1rem; padding: 16px 36px;">
+            Start with Day 0 — Foundations →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <p>Built with ♥ for the OpenTelemetry community · <a href="https://github.com" target="_blank">View on GitHub</a></p>
+    </footer>
+
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

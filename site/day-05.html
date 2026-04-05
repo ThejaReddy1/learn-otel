@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 5 — Pipelines & Processors | OTel Learning</title>
+  <meta name="description" content="Learn about span processors, batching, and sampling. Understand the tradeoffs in telemetry pipeline design for production OpenTelemetry systems.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="header-logo"><span class="logo-icon">🔭</span><span>OTel Learning</span></a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a><a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html" class="active">Days</a><a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link" data-day="0"><span class="day-badge">0</span><span>Foundations</span><span class="check-icon">✓</span></a>
+      <a href="day-01.html" class="sidebar-link" data-day="1"><span class="day-badge">1</span><span>OTel Basics</span><span class="check-icon">✓</span></a>
+      <a href="day-02.html" class="sidebar-link" data-day="2"><span class="day-badge">2</span><span>Instrumentation</span><span class="check-icon">✓</span></a>
+      <a href="day-03.html" class="sidebar-link" data-day="3"><span class="day-badge">3</span><span>Collector</span><span class="check-icon">✓</span></a>
+      <a href="day-04.html" class="sidebar-link" data-day="4"><span class="day-badge">4</span><span>Exporters</span><span class="check-icon">✓</span></a>
+      <a href="day-05.html" class="sidebar-link active" data-day="5"><span class="day-badge">5</span><span>Pipelines</span><span class="check-icon">✓</span></a>
+      <a href="day-06.html" class="sidebar-link" data-day="6"><span class="day-badge">6</span><span>OTCA Concepts</span><span class="check-icon">✓</span></a>
+      <a href="day-07.html" class="sidebar-link" data-day="7"><span class="day-badge">7</span><span>Mini Project</span><span class="check-icon">✓</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link"><span class="day-badge">⚡</span><span>Quick Start</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Day 5</span>
+        </div>
+        <div class="page-day-label day-5">Day 5 — Advanced</div>
+        <h1 class="page-title">Pipelines & Processors</h1>
+        <p class="page-description">
+          This is where observability design starts to include tradeoffs. Batching improves efficiency. 
+          Sampling reduces cost. Pipelines decide how signals flow from creation to export.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <span style="font-size:0.78rem;color:var(--text-muted);background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);padding:4px 12px;border-radius:100px;">⏱ ~45 min hands-on</span>
+          <span style="font-size:0.78rem;color:var(--accent-yellow);background:rgba(249,199,79,0.08);border:1px solid rgba(249,199,79,0.2);padding:4px 12px;border-radius:100px;">🟡 Intermediate</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <h2 id="learning-outcomes">Learning Outcomes</h2>
+        <ul>
+          <li>Explain what span processors do and when to use each type</li>
+          <li>Understand why batching helps production systems</li>
+          <li>Explore sampling tradeoffs with real code</li>
+        </ul>
+
+        <h2 id="modules">Modules</h2>
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">⚙️</div>
+            <div class="module-card-title">Span Processors</div>
+            <div class="module-card-desc">SimpleSpanProcessor vs BatchSpanProcessor — when to use which, and why it matters.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🎲</div>
+            <div class="module-card-title">Span Sampling</div>
+            <div class="module-card-desc">TraceIdRatioBased sampling — control what percentage of traces are captured.</div>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SPAN PROCESSORS MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="span-processors">Module: Span Processors</h2>
+        <p>A span processor sits between span creation and export. It decides <strong>when</strong> and <strong>how</strong> spans get sent to the exporter. This is a critical production decision.</p>
+
+        <div class="diagram-box">
+          <div class="diagram-flow">
+            <div class="diagram-node">🔧 Span Created</div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">⚙️ Span Processor</div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">📤 Exporter</div>
+          </div>
+        </div>
+
+        <h3>SimpleSpanProcessor</h3>
+        <p>Exports each span <strong>immediately</strong> as it completes. Great for learning and development, but adds latency to every operation in production.</p>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — immediate export</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
+
+exporter = ConsoleSpanExporter()
+processor = SimpleSpanProcessor(exporter)
+provider.add_span_processor(processor)</code></pre>
+        </div>
+
+        <h3>BatchSpanProcessor</h3>
+        <p>Buffers spans and exports them <strong>in batches</strong> on a schedule. Much better for production — reduces network overhead and doesn't block your application while exporting.</p>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — batched export</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+exporter = OTLPSpanExporter(endpoint="http://localhost:4318/v1/traces")
+processor = BatchSpanProcessor(exporter)
+provider.add_span_processor(processor)</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">✅ Production Rule of Thumb</div>
+          <div class="callout-body">Use <code>SimpleSpanProcessor</code> for local development and learning. Use <code>BatchSpanProcessor</code> for anything production-like. Batching is especially important when exporting over the network (OTLP).</div>
+        </div>
+
+        <h3>Full Example — BatchSpanProcessor with OTLP</h3>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — payment.py (batch + OTLP)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+def configure_tracer():
+    exporter = OTLPSpanExporter(endpoint="http://localhost:4318/v1/traces")
+    span_processor = BatchSpanProcessor(exporter)
+    provider = TracerProvider()
+    provider.add_span_processor(span_processor)
+    trace.set_tracer_provider(provider)
+    return trace.get_tracer("payment.py", "0.1.0")
+
+tracer = configure_tracer()
+
+@tracer.start_as_current_span("Starting Payment")
+def process_payment():
+    print("processing payment")
+    validate_card()
+    charge_bank()
+
+def validate_card():
+    with tracer.start_as_current_span("Validating Card"):
+        print("validating card")
+
+def charge_bank():
+    with tracer.start_as_current_span("Charging Bank"):
+        print("charging bank")
+
+if __name__ == "__main__":
+    with tracer.start_as_current_span("Payment Service"):
+        process_payment()</code></pre>
+        </div>
+
+        <h3>Try it yourself</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Run the span processors example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-05-pipelines\span-processors\payment.py</code></pre>
+            </div>
+            <p>Note: This uses OTLP by default. Start the Collector first, or switch to <code>ConsoleSpanExporter</code> in the code to see console output.</p>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SPAN SAMPLING MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="sampling">Module: Span Sampling</h2>
+        <p>Sampling decides which traces to <strong>keep</strong> and which to <strong>discard</strong>. In high-traffic production systems, you can't afford to export every single trace. Sampling gives you control over this tradeoff.</p>
+
+        <div class="callout callout-info">
+          <div class="callout-title">🎯 The Core Tradeoff</div>
+          <div class="callout-body">
+            <strong>More data</strong> = better debugging, higher cost (storage, network, compute)<br>
+            <strong>Less data</strong> = lower cost, possible blind spots during incidents
+          </div>
+        </div>
+
+        <h3>Sampling Strategies</h3>
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🎯</div>
+            <div class="module-card-title">Always On</div>
+            <div class="module-card-desc">Keep everything. Best for learning, dev environments, or low-traffic services. The default.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🎲</div>
+            <div class="module-card-title">TraceIdRatioBased</div>
+            <div class="module-card-desc">Keep a percentage of traces (e.g. 10%). Uses trace ID hash for consistent sampling decisions.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🚫</div>
+            <div class="module-card-title">Always Off</div>
+            <div class="module-card-desc">Discard everything. Useful for testing overhead without export, or kill-switch scenarios.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-info" style="margin-top:24px; margin-bottom:32px;">
+          <div class="callout-title">🧠 Head-Based vs. Tail-Based Sampling</div>
+          <div class="callout-body">
+            You will hear these two terms constantly. Here is the difference:
+            <ul style="margin-top: 8px;">
+              <li><strong>Head-Based (What we code below):</strong> The decision to keep or drop the trace is made at the very <em>beginning</em> of the request. <strong>Pros:</strong> Fast and cheap. <strong>Cons:</strong> You might drop a trace that eventually throws an error down the line.</li>
+              <li><strong>Tail-Based:</strong> The Collector automatically holds the <em>entire trace</em> in memory until the request finishes, and only <em>then</em> decides to keep or drop it (e.g., "Keep 100% of errors, but only 5% of successes"). <strong>Pros:</strong> You never miss an error. <strong>Cons:</strong> Requires a massive, memory-heavy Collector.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Server with Sampling — charge.py</h3>
+        <p>This server uses <code>TraceIdRatioBased(0.1)</code> — only 1 out of every 10 traces will be sampled and exported:</p>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — charge.py (sampled server)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>from flask import Flask, request
+from opentelemetry.sdk.resources import Resource
+from opentelemetry import trace, context
+from opentelemetry.propagate import extract
+from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+
+def configure_tracer():
+    exporter = ConsoleSpanExporter()
+    span_processor = BatchSpanProcessor(exporter)
+    resource = Resource.create({
+        "service.name": "Charge service",
+        "service.version": "0.4.0"
+    })
+
+    # Only sample 10% of traces
+    sampler = TraceIdRatioBased(0.1)
+
+    provider = TracerProvider(resource=resource, sampler=sampler)
+    provider.add_span_processor(span_processor)
+    trace.set_tracer_provider(provider)
+    return trace.get_tracer("charge.py", "0.4.0")
+
+tracer = configure_tracer()
+app = Flask(__name__)
+
+@app.before_request
+def before_request_func():
+    token = context.attach(extract(request.headers))
+    request.environ["context_token"] = token
+
+@app.teardown_request
+def teardown_request_function(err):
+    token = request.environ.get("context_token", None)
+    if token:
+        context.detach(token)
+
+@app.route("/charge")
+@tracer.start_as_current_span("Charge Account", kind=trace.SpanKind.SERVER)
+def charge():
+    span = trace.get_current_span()
+    span.set_attributes({
+        "HTTP_METHOD": request.method,
+        "CLIENT_IP": request.remote_addr,
+        "HTTP_PATH": request.path
+    })
+    span.add_event("User has insufficient Funds, only has $5")
+    return "Charging Users Bank Account"
+
+if __name__ == "__main__":
+    app.run(debug=True)</code></pre>
+        </div>
+
+        <div class="callout callout-info" style="margin-top:24px;">
+          <div class="callout-title">⚙️ Equivalent Environment Variables</div>
+          <div class="callout-body">
+            You don't have to code your sampler into the app. Using standard OpenTelemetry environment variables achieves the exact same result automatically (very important for the OTCA exam):<br><br>
+            <code>OTEL_TRACES_SAMPLER=traceidratio</code><br>
+            <code>OTEL_TRACES_SAMPLER_ARG=0.1</code>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ Sampling is probabilistic</div>
+          <div class="callout-body">With <code>TraceIdRatioBased(0.1)</code>, roughly 10% of traces are kept. Run the client multiple times — some requests produce trace output, others don't. This is expected behavior, not a bug.</div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 Distributed Systems: Use ParentBased</div>
+          <div class="callout-body">
+            <code>TraceIdRatioBased</code> makes <strong>independent</strong> sampling decisions on each service. In a distributed system, a child span might sample while the parent did not — breaking trace continuity.<br><br>
+            The recommended production pattern wraps it with <code>ParentBased</code>, which respects the parent's sampling decision:<br>
+            <code>sampler = ParentBased(root=TraceIdRatioBased(0.1))</code><br><br>
+            Or use the convenience alias: <code>ParentBasedTraceIdRatio(0.1)</code>
+          </div>
+        </div>
+
+        <h3>Client with Context Propagation — payment.py</h3>
+        <p>The client sends requests with trace context injected into headers. It also demonstrates adding custom span attributes and recording exceptions:</p>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — payment.py (client with propagation)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>import requests
+from opentelemetry.sdk.resources import Resource
+from opentelemetry import trace
+from opentelemetry.propagate import inject
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+
+def configure_tracer():
+    exporter = ConsoleSpanExporter()
+    span_processor = BatchSpanProcessor(exporter)
+    resource = Resource.create({
+        "service.name": "payment_service",
+        "service.version": "0.2.0"
+    })
+    provider = TracerProvider(resource=resource)
+    provider.add_span_processor(span_processor)
+    trace.set_tracer_provider(provider)
+    return trace.get_tracer("payment.py", "0.1.0")
+
+tracer = configure_tracer()
+
+@tracer.start_as_current_span("Starting Payment")
+def process_payment():
+    span = trace.get_current_span()
+    span.set_attributes({
+        "user": "john",
+        "account_number": "7372349",
+        "bank": "SBI"
+    })
+    print("processing payment")
+    validate_card()
+    charge_bank()
+
+@tracer.start_as_current_span("Validating Card")
+def validate_card():
+    print("validating card")
+
+@tracer.start_as_current_span("Charge Bank")
+def charge_bank():
+    print("charging bank")
+    with tracer.start_as_current_span("Request to Charge API", kind=trace.SpanKind.CLIENT) as span:
+        try:
+            url = "http://127.0.0.1:5000/charge"
+            # NOTE: In production, use standard OTel Semantic Conventions instead of custom keys:
+            # "http.request.method" instead of "HTTP_METHOD"
+            # "url.full" instead of "HTTP_URL"
+            span.set_attributes({"HTTP_METHOD": "GET", "HTTP_URL": url})
+            headers = {}
+            inject(headers)  # Inject trace context into HTTP headers
+            span.add_event("Sending Request")
+            resp = requests.get(url, headers=headers)
+            span.add_event("Request Sent", attributes={"url": url})
+            span.set_attribute("HTTP_STATUS_CODE", resp.status_code)
+        except Exception as err:
+            span.record_exception(err)  # OTel records exceptions automatically
+
+if __name__ == "__main__":
+    with tracer.start_as_current_span("Payment Service"):
+        process_payment()</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🧠 inject() vs extract()</div>
+          <div class="callout-body">
+            <strong>inject(headers)</strong> — Client-side. Puts trace ID and span ID into outgoing HTTP headers.<br>
+            <strong>extract(request.headers)</strong> — Server-side. Reads trace context from incoming HTTP headers.<br><br>
+            Together, they create distributed traces across service boundaries.
+          </div>
+        </div>
+
+        <h3>Try it yourself</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Start the sampled server</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-05-pipelines\span-sampling\charge.py</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>In another terminal, send requests</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-05-pipelines\span-sampling\payment.py</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Repeat and compare</h4>
+            <p>Run the client several times. Notice that some requests produce trace output on the server side and some don't — that's the 10% sampling rate in action.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            🔧 Troubleshooting
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <ul>
+              <li>If sampling seems random, that is expected — run the example multiple times.</li>
+              <li>If you are comparing console output with OTLP output, make sure you know which exporter is currently enabled in the code.</li>
+              <li>If nothing appears immediately with BatchSpanProcessor, remember that batched export waits briefly before flushing.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="checklist">Readiness Checklist</h2>
+        <ul class="checklist">
+          <li class="checklist-item">
+            <input type="checkbox" id="day5-simple-vs-batch">
+            <label for="day5-simple-vs-batch">I can explain Simple vs Batch span processors</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day5-batching">
+            <label for="day5-batching">I understand why batching matters in production</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day5-sampling">
+            <label for="day5-sampling">I can describe at least two sampling strategies</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day5-ratio">
+            <label for="day5-ratio">I can configure TraceIdRatioBased sampling</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day5-inject-extract">
+            <label for="day5-inject-extract">I understand inject() vs extract() for context propagation</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day5-tradeoffs">
+            <label for="day5-tradeoffs">I understand the cost vs visibility tradeoff</label>
+          </li>
+        </ul>
+      </div>
+
+      <nav class="page-nav">
+        <a href="day-04.html" class="page-nav-link prev">
+          <span class="page-nav-label">← Previous</span>
+          <span class="page-nav-title">Day 4 — Exporters</span>
+        </a>
+        <a href="day-06.html" class="page-nav-link next">
+          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-title">Day 6 — OTCA Concepts</span>
+        </a>
+      </nav>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

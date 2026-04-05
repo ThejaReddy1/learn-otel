@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Start | OTel Learning</title>
+  <meta name="description" content="Get up and running with the OpenTelemetry Learning Path in minutes. Install dependencies, start the Collector, and run your first example.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="header-logo"><span class="logo-icon">🔭</span><span>OTel Learning</span></a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a>
+      <a href="quick-start.html" class="active">Quick Start</a>
+      <a href="day-00.html">Days</a>
+      <a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link" data-day="0"><span class="day-badge">0</span><span>Foundations</span><span class="check-icon">✓</span></a>
+      <a href="day-01.html" class="sidebar-link" data-day="1"><span class="day-badge">1</span><span>OTel Basics</span><span class="check-icon">✓</span></a>
+      <a href="day-02.html" class="sidebar-link" data-day="2"><span class="day-badge">2</span><span>Instrumentation</span><span class="check-icon">✓</span></a>
+      <a href="day-03.html" class="sidebar-link" data-day="3"><span class="day-badge">3</span><span>Collector</span><span class="check-icon">✓</span></a>
+      <a href="day-04.html" class="sidebar-link" data-day="4"><span class="day-badge">4</span><span>Exporters</span><span class="check-icon">✓</span></a>
+      <a href="day-05.html" class="sidebar-link" data-day="5"><span class="day-badge">5</span><span>Pipelines</span><span class="check-icon">✓</span></a>
+      <a href="day-06.html" class="sidebar-link" data-day="6"><span class="day-badge">6</span><span>OTCA Concepts</span><span class="check-icon">✓</span></a>
+      <a href="day-07.html" class="sidebar-link" data-day="7"><span class="day-badge">7</span><span>Mini Project</span><span class="check-icon">✓</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link active"><span class="day-badge">⚡</span><span>Quick Start</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Quick Start</span>
+        </div>
+        <div class="page-day-label day-1">⚡ Setup Guide</div>
+        <h1 class="page-title">Quick Start</h1>
+        <p class="page-description">
+          Get up and running in under 5 minutes. Clone the repo, install Python dependencies, and run your first tracing example.
+        </p>
+      </div>
+
+      <div class="content">
+
+        <h2 id="prerequisites">What You Need</h2>
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🐍</div>
+            <div class="module-card-title">Python 3.8+</div>
+            <div class="module-card-desc">The examples use Python with the OpenTelemetry SDK.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🐳</div>
+            <div class="module-card-title">Docker Desktop</div>
+            <div class="module-card-desc">Required for Day 3+ when running the OTel Collector.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📝</div>
+            <div class="module-card-title">Code Editor</div>
+            <div class="module-card-desc">VS Code recommended, but any editor works.</div>
+          </div>
+        </div>
+
+        <h2 id="setup">Step-by-Step Setup</h2>
+
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Clone the repository</h4>
+            <div class="code-block" data-lang="shell">
+              <div class="code-header"><span class="code-lang">shell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>git clone https://github.com/your-username/OTelInstrumentation.git
+cd OTelInstrumentation</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Install Python dependencies</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py -m pip install -r .\shared-resources\python\requirements.txt</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>(Optional) Install auto-instrumentation packages</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py -m pip install -r .\shared-resources\python\requirements-auto.txt</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <div class="step-body">
+            <h4>(Optional) Start the Collector</h4>
+            <p>Needed for Day 3+ examples that export via OTLP.</p>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>docker compose -f .\shared-resources\collector\docker-compose.yaml up -d</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">5</div>
+          <div class="step-body">
+            <h4>Run your first example!</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-01-basics\manual-instrumentation\payment.py</code></pre>
+            </div>
+            <p>You should see span data printed to the console. 🎉</p>
+          </div>
+        </div>
+
+        <h2 id="repo-layout">Repository Layout</h2>
+        <div class="code-block" data-lang="text">
+          <div class="code-header"><span class="code-lang">directory structure</span></div>
+          <pre><code>/otel-learning
+  /day-00-foundations      ← Observability concepts
+  /day-01-basics           ← First spans & resource attributes
+  /day-02-instrumentation  ← Flask, distributed tracing, metrics
+  /day-03-collector        ← Docker, Collector config
+  /day-04-exporters        ← OTLP, Prometheus, log correlation
+  /day-05-pipelines        ← Span processors & sampling
+  /day-06-otca             ← Certification concept review
+  /day-07-project          ← Mini projects
+/shared-resources          ← Python deps, Collector configs
+/docs                      ← Blog, community sharing</code></pre>
+        </div>
+
+        <h2 id="troubleshooting">Common Issues</h2>
+
+        <div class="collapsible open">
+          <button class="collapsible-trigger">
+            <code>py</code> command not found
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>Try <code>python</code> or <code>python3</code> instead. On some systems, the Python launcher isn't installed.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            OTLP exports fail
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>Make sure the Collector is running on <code>localhost:4317</code> (gRPC) and <code>localhost:4318</code> (HTTP). Check with <code>docker ps</code>.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            Prometheus metrics not visible
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>Keep the app running and check <a href="http://localhost:8000/metrics" target="_blank">http://localhost:8000/metrics</a>. The metrics endpoint only exists while the process is alive.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🚀 Ready to Learn!</div>
+          <div class="callout-body">
+            Your environment is set up. Head to <a href="day-00.html">Day 0 — Foundations</a> to build your mental model, 
+            or jump straight to <a href="day-01.html">Day 1 — OTel Basics</a> if you're eager to write code.
+          </div>
+        </div>
+
+        <h2 id="contributing">Contributing</h2>
+        <p>This repository is designed for learners first. You can contribute by:</p>
+        <ul>
+          <li>Improving explanations in README files</li>
+          <li>Fixing typos, naming issues, and broken commands</li>
+          <li>Adding expected output screenshots or sample payloads</li>
+          <li>Adding small, focused examples for logs, metrics, traces, or Collector pipelines</li>
+        </ul>
+        <p>See the full <a href="https://github.com" target="_blank">Contributing Guide</a> for details.</p>
+      </div>
+
+      <nav class="page-nav">
+        <a href="index.html" class="page-nav-link prev">
+          <span class="page-nav-label">← Back to</span>
+          <span class="page-nav-title">Learning Path Home</span>
+        </a>
+        <a href="day-00.html" class="page-nav-link next">
+          <span class="page-nav-label">Start Learning →</span>
+          <span class="page-nav-title">Day 0 — Foundations</span>
+        </a>
+      </nav>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

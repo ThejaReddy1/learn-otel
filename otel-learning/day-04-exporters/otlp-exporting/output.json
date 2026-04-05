@@ -1,0 +1,84 @@
+python main.py
+{
+    "name": "Search Flight",
+    "context": {
+        "trace_id": "0x6471205078f9a389a59aeb9ff8562f20",
+        "span_id": "0x9365a9bd9a836ab2",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": "0x61b16a8a6074d736",
+    "start_time": "2026-02-15T09:51:03.769289Z",
+    "end_time": "2026-02-15T09:51:03.769289Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+D:\OTelInstrumentation\day-04\ExportingToOTLP\main.py:57: DeprecationWarning: The 'warn' function is deprecated, use 'warning' instead
+  logging.warn("Reserving flight")
+{
+    "name": "Reserver Flight",
+    "context": {
+        "trace_id": "0x6471205078f9a389a59aeb9ff8562f20",
+        "span_id": "0xd8da10e7104d29e9",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": "0x61b16a8a6074d736",
+    "start_time": "2026-02-15T09:51:03.770321Z",
+    "end_time": "2026-02-15T09:51:03.770321Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "Book Flight",
+    "context": {
+        "trace_id": "0x6471205078f9a389a59aeb9ff8562f20",
+        "span_id": "0x61b16a8a6074d736",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-02-15T09:51:03.769289Z",
+    "end_time": "2026-02-15T09:51:03.771322Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}

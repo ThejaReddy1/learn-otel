@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 6 — OTCA Concepts | OTel Learning</title>
+  <meta name="description" content="Map OTCA certification concepts to hands-on examples. Resource attributes, exporters, processors, context propagation — all connected to what you already practiced.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="header-logo"><span class="logo-icon">🔭</span><span>OTel Learning</span></a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a><a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html" class="active">Days</a><a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link" data-day="0"><span class="day-badge">0</span><span>Foundations</span><span class="check-icon">✓</span></a>
+      <a href="day-01.html" class="sidebar-link" data-day="1"><span class="day-badge">1</span><span>OTel Basics</span><span class="check-icon">✓</span></a>
+      <a href="day-02.html" class="sidebar-link" data-day="2"><span class="day-badge">2</span><span>Instrumentation</span><span class="check-icon">✓</span></a>
+      <a href="day-03.html" class="sidebar-link" data-day="3"><span class="day-badge">3</span><span>Collector</span><span class="check-icon">✓</span></a>
+      <a href="day-04.html" class="sidebar-link" data-day="4"><span class="day-badge">4</span><span>Exporters</span><span class="check-icon">✓</span></a>
+      <a href="day-05.html" class="sidebar-link" data-day="5"><span class="day-badge">5</span><span>Pipelines</span><span class="check-icon">✓</span></a>
+      <a href="day-06.html" class="sidebar-link active" data-day="6"><span class="day-badge">6</span><span>OTCA Concepts</span><span class="check-icon">✓</span></a>
+      <a href="day-07.html" class="sidebar-link" data-day="7"><span class="day-badge">7</span><span>Mini Project</span><span class="check-icon">✓</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link"><span class="day-badge">⚡</span><span>Quick Start</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Day 6</span>
+        </div>
+        <div class="page-day-label day-6">Day 6 — Review</div>
+        <h1 class="page-title">OTCA Concepts</h1>
+        <p class="page-description">
+          Certification prep becomes easier when each concept is tied to something you have already run. 
+          Instead of memorizing definitions, map terms back to real examples.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <span style="font-size:0.78rem;color:var(--text-muted);background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);padding:4px 12px;border-radius:100px;">⏱ ~20 min review</span>
+          <span style="font-size:0.78rem;color:var(--accent-yellow);background:rgba(249,199,79,0.08);border:1px solid rgba(249,199,79,0.2);padding:4px 12px;border-radius:100px;">🟡 Intermediate</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <h2 id="learning-outcomes">Learning Outcomes</h2>
+        <ul>
+          <li>Explain the core OpenTelemetry data types</li>
+          <li>Describe the role of the Collector in a telemetry pipeline</li>
+          <li>Understand resource attributes, context propagation, exporters, processors, and sampling</li>
+        </ul>
+
+        <h2 id="signal-decision">Which Signal Should I Use?</h2>
+        <p>One of the most common early questions: <em>do I use a log, metric, or trace here?</em> This table helps you decide quickly:</p>
+
+        <div style="overflow-x:auto;margin-bottom:32px;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border-default);">
+                <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;">Question you're answering</th>
+                <th style="padding:12px 16px;text-align:left;color:var(--accent-blue);">Use</th>
+                <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;">Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:12px 16px;color:var(--text-secondary);">"What happened at 14:03:22?"</td>
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-cyan);">Log</strong></td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Payment declined for user #4421</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:12px 16px;color:var(--text-secondary);">"How many requests per second?"</td>
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-orange);">Metric</strong></td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Counter: http_requests_total</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:12px 16px;color:var(--text-secondary);">"Why is this request slow?"</td>
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-purple);">Trace</strong></td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Span timeline shows DB query took 800ms</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:12px 16px;color:var(--text-secondary);">"Is latency getting worse over time?"</td>
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-orange);">Metric</strong></td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Histogram: request_duration_ms</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:12px 16px;color:var(--text-secondary);">"Which service in a chain is failing?"</td>
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-purple);">Trace</strong></td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Distributed trace spans STATUS=ERROR on checkout-svc</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px;color:var(--text-secondary);">"Did the deploy cause errors?"</td>
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-cyan);">All three</strong></td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Error rate spike (metric) + stack trace (log) + slow spans (trace)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="instrumentation-comparison">Instrumentation Approaches Compared</h2>
+        <div style="overflow-x:auto;margin-bottom:32px;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border-default);">
+                <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;">Approach</th>
+                <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;">Code changes?</th>
+                <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;">Control level</th>
+                <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;">Best for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-blue);">Manual</strong></td>
+                <td style="padding:12px 16px;color:var(--text-secondary);">Yes — write every span</td>
+                <td style="padding:12px 16px;color:var(--text-secondary);">Full control</td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Business logic, custom spans</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border-subtle);">
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-purple);">Library</strong></td>
+                <td style="padding:12px 16px;color:var(--text-secondary);">Minimal — one call to instrument</td>
+                <td style="padding:12px 16px;color:var(--text-secondary);">Library-defined spans</td>
+                <td style="padding:12px 16px;color:var(--text-muted);">HTTP, DB, messaging frameworks</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px;"><strong style="color:var(--accent-cyan);">Auto</strong></td>
+                <td style="padding:12px 16px;color:var(--text-secondary);">None — external command</td>
+                <td style="padding:12px 16px;color:var(--text-secondary);">Automatic only</td>
+                <td style="padding:12px 16px;color:var(--text-muted);">Quick start, legacy apps</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="study-map">Study Map</h2>
+        <p>Every OTCA concept maps to something you've already practiced. Use this reference to connect theory to hands-on experience:</p>
+
+        <div class="modules-grid">
+          <a href="day-01.html" class="module-card" style="text-decoration: none;">
+            <div class="module-card-icon">🔍</div>
+            <div class="module-card-title">Traces & Spans</div>
+            <div class="module-card-desc">Day 1 + Day 2 — Creating tracers, spans, nested spans, and understanding parent-child relationships.</div>
+          </a>
+          <a href="day-02.html#api-instrumentation" class="module-card" style="text-decoration: none;">
+            <div class="module-card-icon">🔗</div>
+            <div class="module-card-title">Context Propagation</div>
+            <div class="module-card-desc">Day 2 — API instrumentation shows how trace context moves between services for connected traces.</div>
+          </a>
+          <a href="day-02.html" class="module-card" style="text-decoration: none;">
+            <div class="module-card-icon">📊</div>
+            <div class="module-card-title">Metrics & Logs</div>
+            <div class="module-card-desc">Day 2 + Day 4 — Metrics module covers counters and histograms. Day 4 covers log correlation.</div>
+          </a>
+          <a href="day-03.html" class="module-card" style="text-decoration: none;">
+            <div class="module-card-icon">📦</div>
+            <div class="module-card-title">Collector Architecture</div>
+            <div class="module-card-desc">Day 3 — Receivers, processors, exporters, and pipelines in the Collector.</div>
+          </a>
+          <a href="day-04.html" class="module-card" style="text-decoration: none;">
+            <div class="module-card-icon">📡</div>
+            <div class="module-card-title">Exporters & OTLP</div>
+            <div class="module-card-desc">Day 4 + Day 5 — OTLP exporting, Prometheus metrics, and pipeline design.</div>
+          </a>
+          <a href="day-05.html" class="module-card" style="text-decoration: none;">
+            <div class="module-card-icon">🎲</div>
+            <div class="module-card-title">Processors & Sampling</div>
+            <div class="module-card-desc">Day 5 — Span processors, batching strategies, and sampling tradeoffs.</div>
+          </a>
+        </div>
+
+        <h2 id="cardinality">Advanced Concept: Cardinality & Cost</h2>
+        <p>Before you take an OTel setup into production, you must understand <strong>Cardinality</strong>. It is the #1 reason observability pipelines fail or result in massive bills.</p>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ The Golden Rule of Metrics</div>
+          <div class="callout-body">
+            <strong>NEVER put unbounded values (like User IDs, Request IDs, or Email Addresses) into a Metric label.</strong>
+          </div>
+        </div>
+
+        <p><strong>Low Cardinality (Safe for Metrics):</strong> HTTP Status Codes (200, 404, 500), HTTP Methods (GET, POST), Service Names. There are a fixed, small number of these.</p>
+        <p><strong>High Cardinality (Dangerous for Metrics):</strong> User IDs (e.g., `user_id="847291"`). If you have 1 million users, your backend now has to store and track 1 million unique metric streams concurrently. This will crash your Prometheus server or result in a massive vendor bill.</p>
+
+        <p><em>So, where do you put the User ID?</em></p>
+        <p>You put High Cardinality data into <strong>Traces</strong> or <strong>Logs</strong> as attributes. Traces are discrete events (they just get appended), whereas Metrics are continuous aggregations.</p>
+
+        <h2 id="concept-review">Concept Quick Review</h2>
+
+        <div class="collapsible open">
+          <button class="collapsible-trigger">
+            What is a Span?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>A span represents one unit of work — like "validate payment" or "query database". Spans have a name, start time, duration, attributes, and optionally a parent span.</p>
+            <p><strong>Practiced in:</strong> <a href="day-01.html">Day 1</a></p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            What is a Trace?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>A trace is a group of related spans forming a tree. All spans in a trace share the same trace ID. The root span has no parent.</p>
+            <p><strong>Practiced in:</strong> <a href="day-01.html">Day 1</a>, <a href="day-02.html">Day 2</a></p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            What are Resource Attributes?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>Resources describe the entity producing telemetry. Service name, version, and environment are common resource attributes. They stay consistent across all telemetry from the same source.</p>
+            <p><strong>Practiced in:</strong> <a href="day-01.html#resource-attributes">Day 1 — Resource Attributes</a></p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            What is Context Propagation?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>Context propagation moves trace context (trace ID, span ID) between services — typically via HTTP headers. Without it, each service creates an isolated trace.</p>
+            <p><strong>Practiced in:</strong> <a href="day-02.html">Day 2 — API Instrumentation</a></p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            What is the Collector?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>A vendor-agnostic service that receives, processes, and exports telemetry. It decouples your application from backend specifics and centralizes telemetry pipeline management.</p>
+            <p><strong>Practiced in:</strong> <a href="day-03.html">Day 3</a></p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            What is OTLP?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>OpenTelemetry Protocol — the standard wire format for transmitting telemetry. Available over gRPC (port 4317) and HTTP (port 4318).</p>
+            <p><strong>Practiced in:</strong> <a href="day-04.html">Day 4</a></p>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">📌 Study Tip</div>
+          <div class="callout-body">If a concept feels abstract, go back to the matching day and <strong>run the example again</strong>. Hands-on experience is the best way to anchor understanding.</div>
+        </div>
+
+        <h2 id="quiz">Test Your Understanding</h2>
+        <p>These are OTCA-style questions. Try to answer before expanding each one.</p>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            Q1: You need to track how many users checked out per minute. Which signal?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p><strong>Metric</strong> — specifically a <code>Counter</code>. You'd use <code>meter.create_counter("checkout_total")</code> and call <code>.add(1, {"region": "us-east"})</code> on each checkout. Metrics answer "how many / how often."</p>
+            <p>Logs would record individual events but can't efficiently aggregate rates. Traces show request flow but don't naturally answer aggregate questions.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            Q2: A request passes through 3 microservices. How do you get one connected trace?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p><strong>Context propagation</strong> — the client injects trace context into HTTP headers (<code>inject(headers)</code>), and each downstream service extracts it (<code>extract(request.headers)</code>) and continues the same trace.</p>
+            <p>Without propagation, each service produces a separate, disconnected trace. With it, all spans share the same <code>trace_id</code> and form a complete tree.</p>
+            <p><strong>Practiced in:</strong> <a href="day-02.html#api-instrumentation">Day 2 — Distributed Tracing</a></p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            Q3: What is the difference between a SimpleSpanProcessor and a BatchSpanProcessor?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p><strong>SimpleSpanProcessor</strong> exports each span <em>immediately</em> when it ends — synchronous, blocks your app, good for dev/learning.</p>
+            <p><strong>BatchSpanProcessor</strong> buffers spans and exports them in batches on a timer (default: every 5 seconds or when 512 spans accumulate) — async, much better for production.</p>
+            <p>Rule of thumb: <code>SimpleSpanProcessor</code> for learning, <code>BatchSpanProcessor</code> for production OTLP export.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            Q4: What does the OTel Collector do that your application cannot?
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>The Collector centralizes telemetry pipeline management <em>outside</em> your application code. Key capabilities:
+            <ul style="padding-left:20px;margin-top:8px;">
+              <li>Receive telemetry from many services simultaneously</li>
+              <li>Transform, filter, or sample data before export</li>
+              <li>Route signals to multiple backends without changing app code</li>
+              <li>Add infrastructure metadata (k8s node name, pod labels, etc.)</li>
+              <li>Absorb traffic spikes and buffer data</li>
+            </ul>
+            </p>
+            <p>Your app only needs to know one endpoint: the Collector's OTLP receiver. The Collector handles everything downstream.</p>
+          </div>
+        </div>
+
+        <h2 id="checklist">Readiness Checklist</h2>
+        <ul class="checklist">
+          <li class="checklist-item">
+            <input type="checkbox" id="day6-data-types">
+            <label for="day6-data-types">I can list the core OTel data types (traces, metrics, logs)</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day6-collector-role">
+            <label for="day6-collector-role">I can describe the Collector's role and components</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day6-propagation">
+            <label for="day6-propagation">I can explain context propagation</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day6-exporters">
+            <label for="day6-exporters">I can name common exporter types</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day6-sampling">
+            <label for="day6-sampling">I can describe sampling tradeoffs</label>
+          </li>
+        </ul>
+      </div>
+
+      <nav class="page-nav">
+        <a href="day-05.html" class="page-nav-link prev">
+          <span class="page-nav-label">← Previous</span>
+          <span class="page-nav-title">Day 5 — Pipelines</span>
+        </a>
+        <a href="day-07.html" class="page-nav-link next">
+          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-title">Day 7 — Mini Project</span>
+        </a>
+      </nav>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

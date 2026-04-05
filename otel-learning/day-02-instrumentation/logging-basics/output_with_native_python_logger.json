@@ -1,0 +1,83 @@
+python main.py
+D:\OTelInstrumentation\day-04\OpentelemetryLogging\main.py: 9: DeprecationWarning: Use ConsoleLogRecordExporter. Since logs are not stable yet this WILL be removed in future releases.       
+  exporter = ConsoleLogExporter()  # Deprecated
+D:\OTelInstrumentation\day-04\OpentelemetryLogging\main.py: 36: DeprecationWarning: The 'warn' function is deprecated, use 'warning' instead
+  logging.warn("Reserving flight")
+{
+    "body": "INFO:root:Strating the booking flight process",
+    "severity_number": 9,
+    "severity_text": "INFO",
+    "attributes": {
+        "code.file.path": "D:\\OTelInstrumentation\\day-04\\OpentelemetryLogging\\main.py",
+        "code.function.name": "book_flight",
+        "code.line.number": 25
+    },
+    "dropped_attributes": 0,
+    "timestamp": "2026-02-15T09:26:07.911203Z",
+    "observed_timestamp": "2026-02-15T09:26:07.911203Z",
+    "trace_id": "0x00000000000000000000000000000000",
+    "span_id": "0x0000000000000000",
+    "trace_flags": 0,
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    },
+    "event_name": ""
+}
+{
+    "body": "INFO:root:Searching for flights",
+    "severity_number": 9,
+    "severity_text": "INFO",
+    "attributes": {
+        "code.file.path": "D:\\OTelInstrumentation\\day-04\\OpentelemetryLogging\\main.py",
+        "code.function.name": "search_flights",
+        "code.line.number": 31
+    },
+    "dropped_attributes": 0,
+    "timestamp": "2026-02-15T09:26:07.911203Z",
+    "observed_timestamp": "2026-02-15T09:26:07.911203Z",
+    "trace_id": "0x00000000000000000000000000000000",
+    "span_id": "0x0000000000000000",
+    "trace_flags": 0,
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    },
+    "event_name": ""
+}
+{
+    "body": "WARNING:root:Reserving flight",
+    "severity_number": 13,
+    "severity_text": "WARN",
+    "attributes": {
+        "code.file.path": "D:\\OTelInstrumentation\\day-04\\OpentelemetryLogging\\main.py",
+        "code.function.name": "reserve_flight",
+        "code.line.number": 36
+    },
+    "dropped_attributes": 0,
+    "timestamp": "2026-02-15T09:26:07.912204Z",
+    "observed_timestamp": "2026-02-15T09:26:07.912204Z",
+    "trace_id": "0x00000000000000000000000000000000",
+    "span_id": "0x0000000000000000",
+    "trace_flags": 0,
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    },
+    "event_name": ""
+}

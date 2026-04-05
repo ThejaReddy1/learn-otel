@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 1 — OpenTelemetry Basics | OTel Learning</title>
+  <meta name="description" content="Create your first tracer, open a span, add resource attributes, and see code execution turn into an observable timeline.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="header-logo">
+      <span class="logo-icon">🔭</span>
+      <span>OTel Learning</span>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a>
+      <a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html" class="active">Days</a>
+      <a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link" data-day="0"><span class="day-badge">0</span><span>Foundations</span><span class="check-icon">✓</span></a>
+      <a href="day-01.html" class="sidebar-link active" data-day="1"><span class="day-badge">1</span><span>OTel Basics</span><span class="check-icon">✓</span></a>
+      <a href="day-02.html" class="sidebar-link" data-day="2"><span class="day-badge">2</span><span>Instrumentation</span><span class="check-icon">✓</span></a>
+      <a href="day-03.html" class="sidebar-link" data-day="3"><span class="day-badge">3</span><span>Collector</span><span class="check-icon">✓</span></a>
+      <a href="day-04.html" class="sidebar-link" data-day="4"><span class="day-badge">4</span><span>Exporters</span><span class="check-icon">✓</span></a>
+      <a href="day-05.html" class="sidebar-link" data-day="5"><span class="day-badge">5</span><span>Pipelines</span><span class="check-icon">✓</span></a>
+      <a href="day-06.html" class="sidebar-link" data-day="6"><span class="day-badge">6</span><span>OTCA Concepts</span><span class="check-icon">✓</span></a>
+      <a href="day-07.html" class="sidebar-link" data-day="7"><span class="day-badge">7</span><span>Mini Project</span><span class="check-icon">✓</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link"><span class="day-badge">⚡</span><span>Quick Start</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Day 1</span>
+        </div>
+        <div class="page-day-label day-1">Day 1 — Hands-On</div>
+        <h1 class="page-title">OpenTelemetry Basics</h1>
+        <p class="page-description">
+          The first win is small: create a tracer, open a span, and see your code execution turn into a timeline. 
+          Day 1 shows that observability starts with understanding what a span represents and why service metadata matters.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <span style="font-size:0.78rem;color:var(--text-muted);background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);padding:4px 12px;border-radius:100px;">⏱ ~30 min hands-on</span>
+          <span style="font-size:0.78rem;color:var(--accent-cyan);background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);padding:4px 12px;border-radius:100px;">🟢 Beginner</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <h2 id="learning-outcomes">Learning Outcomes</h2>
+        <ul>
+          <li>Understand what a tracer, span, and span processor are</li>
+          <li>Create nested spans manually</li>
+          <li>Add service metadata with resource attributes</li>
+          <li>Attach attributes and events to spans</li>
+          <li>Set span status codes (UNSET, OK, ERROR)</li>
+        </ul>
+
+        <h2 id="prerequisites">Prerequisites</h2>
+        <div class="code-block" data-lang="powershell">
+          <div class="code-header">
+            <span class="code-lang">powershell</span>
+            <button class="code-copy-btn">Copy</button>
+          </div>
+          <pre><code>py -m pip install -r .\shared-resources\python\requirements.txt</code></pre>
+        </div>
+
+        <h2 id="signals-matrix">The Signals Matrix</h2>
+        <p>Before we create data, you need to know <em>what</em> data to create. OpenTelemetry categorizes data into three "Signals". Use this matrix to decide what you need:</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 16px 0 32px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden;">
+          <thead>
+            <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border-default); text-align: left;">
+              <th style="padding: 12px 16px; font-weight: 700;">Signal</th>
+              <th style="padding: 12px 16px; font-weight: 700;">What is it?</th>
+              <th style="padding: 12px 16px; font-weight: 700;">Best Used For...</th>
+              <th style="padding: 12px 16px; font-weight: 700;">Drawback</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 12px 16px;"><strong>Traces</strong> 🚥</td>
+              <td style="padding: 12px 16px;">The journey of a single request across multiple services.</td>
+              <td style="padding: 12px 16px;">Debugging latency ("Why is checkout slow?") & finding bottlenecks.</td>
+              <td style="padding: 12px 16px; color: var(--text-secondary);">High data volume / expensive to store blindly.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 12px 16px;"><strong>Metrics</strong> 📊</td>
+              <td style="padding: 12px 16px;">Numbers aggregated over time (e.g. CPU %, Error rate).</td>
+              <td style="padding: 12px 16px;">Dashboarding & Alerting ("Page me if errors > 5%").</td>
+              <td style="padding: 12px 16px; color: var(--text-secondary);">Cannot tell you <em>which</em> user failed, only that failures happened.</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 16px;"><strong>Logs</strong> 📝</td>
+              <td style="padding: 12px 16px;">A timestamped record of a specific discrete event.</td>
+              <td style="padding: 12px 16px;">Auditing ("User X changed password") & deep debugging.</td>
+              <td style="padding: 12px 16px; color: var(--text-secondary);">Lacks context without Trace IDs attached to them.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="modules">Modules</h2>
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🔧</div>
+            <div class="module-card-title">Manual Instrumentation</div>
+            <div class="module-card-desc">Create spans with context managers and decorators. Recognize parent-child relationships.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🏷️</div>
+            <div class="module-card-title">Resource Attributes</div>
+            <div class="module-card-desc">Add metadata about the service that emits telemetry — service.name, service.version.</div>
+          </div>
+        </div>
+
+        <h2 id="manual-instrumentation">Module: Manual Instrumentation</h2>
+        <p>These examples show the smallest useful tracing setup: a tracer provider, a span processor, a console exporter, and a few spans.</p>
+
+        <h3>The Code</h3>
+        <p>Here's the basic payment tracing example that demonstrates nested spans:</p>
+
+        <div class="code-block" data-lang="python">
+          <div class="code-header">
+            <span class="code-lang">python — payment.py</span>
+            <button class="code-copy-btn">Copy</button>
+          </div>
+          <pre><code>from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
+
+def configure_tracer():
+    exporter = ConsoleSpanExporter()
+    span_processor = SimpleSpanProcessor(exporter)
+    provider = TracerProvider()
+    provider.add_span_processor(span_processor)
+    trace.set_tracer_provider(provider)
+    return trace.get_tracer("payment.py", "0.1.0")
+
+tracer = configure_tracer()
+
+@tracer.start_as_current_span("Starting Payment")
+def process_payment():
+    print("processing payment")
+    validate_card()
+    charge_bank()
+
+def validate_card():
+    with tracer.start_as_current_span("Validating Card"):
+        print("validating card")
+
+def charge_bank():
+    with tracer.start_as_current_span("Charging Bank"):
+        print("charging bank")
+
+if __name__ == "__main__":
+    with tracer.start_as_current_span("Payment Service"):
+        process_payment()</code></pre>
+        </div>
+
+        <div class="callout callout-info" style="margin-top:24px;">
+          <div class="callout-title">🐍 Demystifying the Python "Magic"</div>
+          <div class="callout-body">
+            You can create spans two ways: <strong>Decorators</strong> (<code>@tracer...</code>) or <strong>Context Managers</strong> (<code>with tracer...</code>). What's the difference?
+            <ul style="margin-top: 8px;">
+              <li><strong>Use the <code>@decorator</code></strong> when you want to trace an entire function from start to finish automatically.</li>
+              <li><strong>Use the <code>with</code> block</strong> when you only want to trace a specific chunk of code <em>inside</em> a larger function.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Run the basic example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-01-basics\manual-instrumentation\payment.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Run the decorator-based example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-01-basics\manual-instrumentation\payment-decorator-way.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Compare the output</h4>
+            <p>Compare the span names and nesting in the console output.</p>
+          </div>
+        </div>
+
+        <h3>Expected Output</h3>
+        <div class="terminal-block">
+          <span class="output">A top-level span for the payment service<br>
+          ├── Child span: "Starting Payment"<br>
+          │&nbsp;&nbsp; ├── Child span: "Validating Card"<br>
+          │&nbsp;&nbsp; └── Child span: "Charging Bank"</span>
+        </div>
+
+        <h2 id="span-enrichment">Enriching Spans: Attributes, Events, and Status</h2>
+        <p>A bare span just has a name and a duration. The real value comes from enriching it with context. There are three key ways to do this:</p>
+
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🏷️</div>
+            <div class="module-card-title">Span Attributes</div>
+            <div class="module-card-desc">Key-value metadata attached to the span — user ID, HTTP method, order amount. Searchable in your backend.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📌</div>
+            <div class="module-card-title">Span Events</div>
+            <div class="module-card-desc">Timestamped log entries inside a span — "payment declined", "retry attempt 2". Like a structured log within the trace.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🚦</div>
+            <div class="module-card-title">Span Status</div>
+            <div class="module-card-desc"><code>UNSET</code> (default), <code>OK</code> (success), or <code>ERROR</code> (failure). Backends use this to flag failing operations.</div>
+          </div>
+        </div>
+
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — enriched span example</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
+
+provider = TracerProvider()
+provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer("payment.py", "0.1.0")
+
+def validate_card(card_number):
+    with tracer.start_as_current_span("Validating Card") as span:
+        # Attributes: searchable key-value metadata on the span
+        span.set_attribute("card.last4", card_number[-4:])
+        span.set_attribute("card.type", "visa")
+
+        # Event: a timestamped note inside the span
+        span.add_event("Card lookup started")
+
+        if card_number == "0000-0000-0000-0000":
+            # Status ERROR: marks this span as failed in your backend
+            span.set_status(trace.StatusCode.ERROR, "Card declined")
+            span.record_exception(ValueError("Invalid card number"))
+            return False
+
+        span.add_event("Card validated successfully")
+        span.set_status(trace.StatusCode.OK)  # Explicit success
+        return True
+
+if __name__ == "__main__":
+    with tracer.start_as_current_span("Payment Service"):
+        validate_card("4242-4242-4242-4242")
+        validate_card("0000-0000-0000-0000")  # This one fails</code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 Status vs Attributes</div>
+          <div class="callout-body">
+            <strong>Status</strong> is a first-class field — backends use it to mark spans as failed, trigger alerts, and let you filter for only error spans.<br><br>
+            <strong>Attributes</strong> are queryable metadata — you can filter traces by <code>card.type="visa"</code> or aggregate by <code>http.route</code>.<br><br>
+            <strong>Events</strong> are the timeline inside a span — useful for understanding <em>when</em> something happened during a long operation.
+          </div>
+        </div>
+
+        <h2 id="resource-attributes">Module: Resource Attributes</h2>
+        <p>This example adds metadata about the service that emits telemetry, such as <code>service.name</code> and <code>service.version</code>.</p>
+
+        <h3>What You'll Learn</h3>
+        <ul>
+          <li>Understand what resource attributes represent</li>
+          <li>Distinguish span attributes from resource attributes</li>
+          <li>Inspect service metadata in exported telemetry</li>
+        </ul>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Run the example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-01-basics\resource-attributes\payment.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Inspect the resource section</h4>
+            <p>Look for the <code>resource</code> section in the output. You should see span output that includes a <code>resource.attributes</code> block with service metadata that stays consistent across spans.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            🔧 Troubleshooting
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <ul>
+              <li>If <code>py</code> fails, use <code>python</code> or <code>python3</code>.</li>
+              <li>If imports fail, reinstall the shared requirements.</li>
+              <li>If the resource block is missing, confirm the tracer provider is created with a <code>Resource</code>.</li>
+              <li>If the script calls <code>http://127.0.0.1:5000/charge</code>, start the related Flask service from Day 2 or comment that section.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="checklist">Readiness Checklist</h2>
+        <p>You're ready for Day 2 if you can check off all of these:</p>
+        <ul class="checklist">
+          <li class="checklist-item">
+            <input type="checkbox" id="day1-tracer">
+            <label for="day1-tracer">I can create a TracerProvider and get a tracer</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day1-spans">
+            <label for="day1-spans">I can create nested spans with context managers</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day1-decorators">
+            <label for="day1-decorators">I understand the decorator approach for spans</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day1-resource">
+            <label for="day1-resource">I can explain what resource attributes are</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day1-console">
+            <label for="day1-console">I can read console span output</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day1-attributes">
+            <label for="day1-attributes">I can add attributes and events to a span</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day1-status">
+            <label for="day1-status">I know the three span status codes: UNSET, OK, ERROR</label>
+          </li>
+        </ul>
+      </div>
+
+      <nav class="page-nav">
+        <a href="day-00.html" class="page-nav-link prev">
+          <span class="page-nav-label">← Previous</span>
+          <span class="page-nav-title">Day 0 — Foundations</span>
+        </a>
+        <a href="day-02.html" class="page-nav-link next">
+          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-title">Day 2 — Instrumentation</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

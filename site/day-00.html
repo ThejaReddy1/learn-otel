@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 0 — Foundations Before You Instrument | OTel Learning</title>
+  <meta name="description" content="Build a clean mental model for observability. Understand logs, metrics, traces, and where OpenTelemetry fits before writing your first line of instrumentation code.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <a href="index.html" class="header-logo">
+      <span class="logo-icon">🔭</span>
+      <span>OTel Learning</span>
+    </a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a>
+      <a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html" class="active">Days</a>
+      <a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link active" data-day="0">
+        <span class="day-badge">0</span>
+        <span>Foundations</span>
+        <span class="check-icon">✓</span>
+      </a>
+      <a href="day-01.html" class="sidebar-link" data-day="1">
+        <span class="day-badge">1</span>
+        <span>OTel Basics</span>
+        <span class="check-icon">✓</span>
+      </a>
+      <a href="day-02.html" class="sidebar-link" data-day="2">
+        <span class="day-badge">2</span>
+        <span>Instrumentation</span>
+        <span class="check-icon">✓</span>
+      </a>
+      <a href="day-03.html" class="sidebar-link" data-day="3">
+        <span class="day-badge">3</span>
+        <span>Collector</span>
+        <span class="check-icon">✓</span>
+      </a>
+      <a href="day-04.html" class="sidebar-link" data-day="4">
+        <span class="day-badge">4</span>
+        <span>Exporters</span>
+        <span class="check-icon">✓</span>
+      </a>
+      <a href="day-05.html" class="sidebar-link" data-day="5">
+        <span class="day-badge">5</span>
+        <span>Pipelines</span>
+        <span class="check-icon">✓</span>
+      </a>
+      <a href="day-06.html" class="sidebar-link" data-day="6">
+        <span class="day-badge">6</span>
+        <span>OTCA Concepts</span>
+        <span class="check-icon">✓</span>
+      </a>
+      <a href="day-07.html" class="sidebar-link" data-day="7">
+        <span class="day-badge">7</span>
+        <span>Mini Project</span>
+        <span class="check-icon">✓</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link">
+        <span class="day-badge">⚡</span>
+        <span>Quick Start</span>
+      </a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Day 0</span>
+        </div>
+        <div class="page-day-label day-0">Day 0 — Orientation</div>
+        <h1 class="page-title">Foundations Before You Instrument Anything</h1>
+        <p class="page-description">
+          Before creating spans, starting the Collector, or exporting telemetry, build a clean mental model for observability. 
+          Day 0 is about understanding what logs, metrics, and traces actually do — and where OpenTelemetry fits.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <span style="font-size:0.78rem;color:var(--text-muted);background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);padding:4px 12px;border-radius:100px;">⏱ ~15 min reading</span>
+          <span style="font-size:0.78rem;color:var(--accent-cyan);background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);padding:4px 12px;border-radius:100px;">🟢 Beginner</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+
+        <h2 id="why-day0">Why Day 0 Matters</h2>
+        <p>Many beginners jump directly into traces, metrics, or the Collector and end up following commands without understanding the system behind them. Day 0 fixes that.</p>
+        <p>By the end of this day, you should be able to answer:</p>
+        <ul>
+          <li>What problem does observability solve?</li>
+          <li>How are logs, metrics, and traces different?</li>
+          <li>Where does OpenTelemetry fit in the observability stack?</li>
+          <li>What does the Collector do?</li>
+          <li>What ideas show up repeatedly in OTCA learning?</li>
+        </ul>
+
+        <h2 id="observability">Observability In Plain Language</h2>
+        <p>Observability is the ability to understand what a system is doing from the signals it produces.</p>
+        <p>In practice, that means answering questions like:</p>
+        <ul>
+          <li>Why is this request slow?</li>
+          <li>Which service is failing?</li>
+          <li>Did latency increase after a deploy?</li>
+          <li>Are errors isolated or system-wide?</li>
+          <li>Can I explain what happened without guessing?</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 Key Insight</div>
+          <div class="callout-body">Observability is not just dashboards. It is a way to investigate unknown problems using telemetry.</div>
+        </div>
+
+        <h2 id="three-signals">The Three Core Signals</h2>
+
+        <h3 id="logs">Logs</h3>
+        <p>Logs are event records. Use logs when you want discrete details such as:</p>
+        <ul>
+          <li>An exception message</li>
+          <li>A user action</li>
+          <li>A deployment event</li>
+          <li>A business event like "payment failed"</li>
+        </ul>
+        <div class="callout callout-tip">
+          <div class="callout-title">💭 Think</div>
+          <div class="callout-body">"Something happened."</div>
+        </div>
+
+        <h3 id="metrics">Metrics</h3>
+        <p>Metrics are numeric measurements over time. Use metrics when you want:</p>
+        <ul>
+          <li>Request counts</li>
+          <li>Error rates</li>
+          <li>CPU and memory trends</li>
+          <li>Latency percentiles</li>
+        </ul>
+        <div class="callout callout-tip">
+          <div class="callout-title">💭 Think</div>
+          <div class="callout-body">"How much, how often, how fast?"</div>
+        </div>
+
+        <h3 id="traces">Traces</h3>
+        <p>Traces show the lifecycle of a request or operation across one or more services. Use traces when you want:</p>
+        <ul>
+          <li>Request flow across services</li>
+          <li>Timing by step</li>
+          <li>Parent-child execution relationships</li>
+          <li>Context during debugging</li>
+        </ul>
+        <div class="callout callout-tip">
+          <div class="callout-title">💭 Think</div>
+          <div class="callout-body">"Where did the time go, and what happened along the way?"</div>
+        </div>
+
+        <h2 id="otel">OpenTelemetry In Plain Language</h2>
+        <p>OpenTelemetry is the open standard and tooling ecosystem used to generate, collect, process, and export telemetry. It helps you:</p>
+        <ul>
+          <li>Instrument applications</li>
+          <li>Create traces, metrics, and logs</li>
+          <li>Standardize telemetry pipelines</li>
+          <li>Export data to many backends</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ Important</div>
+          <div class="callout-body">OpenTelemetry is <strong>not</strong> the backend where you analyze data. It is the layer that helps produce and move telemetry.</div>
+        </div>
+
+        <h2 id="mental-model">The Mental Model & Architecture</h2>
+        <p>Before writing code, you need a mental map of how data actually moves in a production system. OpenTelemetry architecture is typically divided into three layers:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-flow" style="display:grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; align-items: start;">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div class="diagram-node" style="border-top: 4px solid var(--accent-blue);">🖥️ Edge Layer<br><small style="font-weight:normal;color:var(--text-muted)">The App / First Mile</small></div>
+              <div style="font-size:0.8rem; text-align:left; color:var(--text-secondary);">
+                • Generates traces/metrics<br>
+                • SDK or Auto-Instrumentation<br>
+                • Sends data via OTLP
+              </div>
+            </div>
+            <div class="diagram-arrow" style="margin-top:20px;">→</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div class="diagram-node" style="border-top: 4px solid var(--accent-purple);">📦 Gateway Layer<br><small style="font-weight:normal;color:var(--text-muted)">The Collector</small></div>
+              <div style="font-size:0.8rem; text-align:left; color:var(--text-secondary);">
+                • Center of Trust<br>
+                • Filtering & Batching<br>
+                • Tail Sampling (Decisions)
+              </div>
+            </div>
+            <div class="diagram-arrow" style="margin-top:20px;">→</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div class="diagram-node" style="border-top: 4px solid var(--accent-yellow);">☁️ Egress Layer<br><small style="font-weight:normal;color:var(--text-muted)">The Backends</small></div>
+              <div style="font-size:0.8rem; text-align:left; color:var(--text-secondary);">
+                • Observability Tools<br>
+                • Grafana, Jaeger, etc.<br>
+                • Final Storage & Alerts
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">💡 Why a Gateway Layer?</div>
+          <div class="callout-body">
+            You *could* send data directly from your App (Edge) straight to your Backend (Egress). But in production, you use a Collector Gateway. Why? Because the Gateway provides a robust buffer against network outages, allows you to strip PII before it leaves your network, and lets you sample (drop) traces to save on massive storage costs.
+          </div>
+        </div>
+
+        <h2 id="key-terms">Key Terms You Should Know</h2>
+
+        <h3>Span</h3>
+        <p>A span represents one unit of work. Examples: "validate payment", "query database", "call shipping service".</p>
+
+        <h3>Trace</h3>
+        <p>A trace is a group of related spans that represent one full request or workflow.</p>
+
+        <h3>Resource</h3>
+        <p>A resource describes the entity producing telemetry — service name, version, environment, host metadata.</p>
+
+        <h3>Attributes</h3>
+        <p>Attributes are key-value details attached to telemetry — HTTP method, route, user region, database name.</p>
+
+        <h3>Context Propagation</h3>
+        <p>Context propagation is how trace context moves between services so multiple spans become one connected trace. Think of a trace like a relay race, and the Trace ID is the baton.</p>
+        <div class="callout callout-info" style="margin-top: 8px;">
+          <div class="callout-body">When Service A makes an HTTP call to Service B, it literally injects a hidden HTTP header (e.g., <code>traceparent: 00-4bf92...</code>) into the request. Service B reads that header, takes the baton, and continues the exact same trace.</div>
+        </div>
+
+        <h3>Exporter</h3>
+        <p>An exporter sends telemetry out of the app or Collector — OTLP exporter, Prometheus exporter, vendor-specific exporters.</p>
+
+        <h3>Collector</h3>
+        <p>The Collector is a separate service that receives, processes, and exports telemetry. It centralizes pipelines and keeps application code cleaner.</p>
+
+        <h2 id="app-vs-collector">App vs Collector Responsibilities</h2>
+        
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🖥️</div>
+            <div class="module-card-title">Application Side</div>
+            <div class="module-card-desc">
+              <ul style="padding-left: 16px; margin: 8px 0 0;">
+                <li>Creating spans, metrics, and logs</li>
+                <li>Adding business and request context</li>
+                <li>Exporting to OTLP or another receiver</li>
+              </ul>
+            </div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📦</div>
+            <div class="module-card-title">Collector Side</div>
+            <div class="module-card-desc">
+              <ul style="padding-left: 16px; margin: 8px 0 0;">
+                <li>Receiving telemetry from many apps</li>
+                <li>Batching or processing data</li>
+                <li>Routing to destinations</li>
+                <li>Reducing backend coupling</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <h2 id="otca">OTCA-Oriented Understanding</h2>
+        <p>If you are learning with OTCA in mind, Day 0 should make these idea groups feel clear:</p>
+        <ul>
+          <li><strong>Telemetry signals:</strong> logs, metrics, traces</li>
+          <li><strong>Instrumentation basics:</strong> manual, library-based, auto-instrumentation</li>
+          <li><strong>Resources and attributes</strong></li>
+          <li><strong>Context propagation</strong></li>
+          <li><strong>Collector roles:</strong> receivers, processors, exporters, pipelines</li>
+          <li><strong>OTLP</strong> as a common transport format</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <div class="callout-title">📝 Note</div>
+          <div class="callout-body">You do not need to memorize everything now. You only need a clean mental model so the later hands-on examples make sense.</div>
+        </div>
+
+        <h2 id="misunderstandings">Common Beginner Misunderstandings</h2>
+
+        <div class="collapsible open">
+          <button class="collapsible-trigger">
+            "OpenTelemetry is my monitoring tool"
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>Not exactly. OpenTelemetry <strong>produces and moves</strong> telemetry. A backend stores, queries, and visualizes it.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            "Logs, metrics, and traces do the same thing"
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>They overlap, but they answer different kinds of questions. Strong observability usually uses all three.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            "The Collector is mandatory for every example"
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>No. It is extremely useful, especially in real systems, but some learning examples can export directly to the console or a backend.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            "Tracing means only microservices"
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <p>No. Even a single process can benefit from spans because they reveal timing and structure inside one application.</p>
+          </div>
+        </div>
+
+        <h2 id="glossary">Glossary of Acronyms</h2>
+        <p>OpenTelemetry is filled with acronyms. Here is your cheat sheet:</p>
+        <ul>
+          <li><strong>OTel:</strong> OpenTelemetry (the open-source project itself).</li>
+          <li><strong>OTLP:</strong> OpenTelemetry Protocol (the language the data speaks over the network).</li>
+          <li><strong>OTCA:</strong> OpenTelemetry Certified Associate (the official Linux Foundation exam).</li>
+          <li><strong>W3C TraceContext:</strong> The official internet standard for the hidden HTTP headers used in context propagation.</li>
+        </ul>
+
+        <h2 id="checklist">Readiness Checklist</h2>
+        <p>You are ready for Day 1 if you can explain each of these:</p>
+
+        <ul class="checklist">
+          <li class="checklist-item">
+            <input type="checkbox" id="day0-logs-metrics-traces">
+            <label for="day0-logs-metrics-traces">The difference between a log, metric, and trace</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day0-span">
+            <label for="day0-span">What a span is</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day0-trace">
+            <label for="day0-trace">What a trace is</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day0-resource">
+            <label for="day0-resource">What resource attributes represent</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day0-context">
+            <label for="day0-context">Why context propagation matters</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day0-collector">
+            <label for="day0-collector">Why a Collector is useful</label>
+          </li>
+        </ul>
+
+        <h2 id="how-to-use">How To Use Day 0 With The Rest Of The Repo</h2>
+        <ul>
+          <li>Start here once before Day 1</li>
+          <li>Revisit it after Day 3 if the Collector still feels abstract</li>
+          <li>Revisit it before Day 6 if you want a stronger OTCA mental model</li>
+        </ul>
+
+      </div>
+
+      <!-- Page Navigation -->
+      <nav class="page-nav">
+        <div></div>
+        <a href="day-01.html" class="page-nav-link next">
+          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-title">Day 1 — OpenTelemetry Basics</span>
+        </a>
+      </nav>
+
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

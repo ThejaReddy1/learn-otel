@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 2 — Instrumentation | OTel Learning</title>
+  <meta name="description" content="Trace real HTTP calls, log meaningful events, count application behavior. Learn manual, library, and auto-instrumentation approaches with OpenTelemetry.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="header-logo"><span class="logo-icon">🔭</span><span>OTel Learning</span></a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a>
+      <a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html" class="active">Days</a>
+      <a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link" data-day="0"><span class="day-badge">0</span><span>Foundations</span><span class="check-icon">✓</span></a>
+      <a href="day-01.html" class="sidebar-link" data-day="1"><span class="day-badge">1</span><span>OTel Basics</span><span class="check-icon">✓</span></a>
+      <a href="day-02.html" class="sidebar-link active" data-day="2"><span class="day-badge">2</span><span>Instrumentation</span><span class="check-icon">✓</span></a>
+      <a href="day-03.html" class="sidebar-link" data-day="3"><span class="day-badge">3</span><span>Collector</span><span class="check-icon">✓</span></a>
+      <a href="day-04.html" class="sidebar-link" data-day="4"><span class="day-badge">4</span><span>Exporters</span><span class="check-icon">✓</span></a>
+      <a href="day-05.html" class="sidebar-link" data-day="5"><span class="day-badge">5</span><span>Pipelines</span><span class="check-icon">✓</span></a>
+      <a href="day-06.html" class="sidebar-link" data-day="6"><span class="day-badge">6</span><span>OTCA Concepts</span><span class="check-icon">✓</span></a>
+      <a href="day-07.html" class="sidebar-link" data-day="7"><span class="day-badge">7</span><span>Mini Project</span><span class="check-icon">✓</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link"><span class="day-badge">⚡</span><span>Quick Start</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Day 2</span>
+        </div>
+        <div class="page-day-label day-2">Day 2 — Practical</div>
+        <h1 class="page-title">Instrumentation</h1>
+        <p class="page-description">
+          Instrumentation is where OpenTelemetry becomes practical. You stop thinking about abstract telemetry 
+          and start tracing real HTTP calls, logging meaningful events, and counting what your application is doing.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <span style="font-size:0.78rem;color:var(--text-muted);background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);padding:4px 12px;border-radius:100px;">⏱ ~60 min hands-on</span>
+          <span style="font-size:0.78rem;color:var(--accent-blue);background:rgba(66,133,244,0.08);border:1px solid rgba(66,133,244,0.2);padding:4px 12px;border-radius:100px;">🟦 Beginner — Intermediate</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <h2 id="learning-outcomes">Learning Outcomes</h2>
+        <ul>
+          <li>Instrument Flask services and client calls</li>
+          <li>Understand distributed tracing and context propagation</li>
+          <li>Capture logs and metrics alongside traces</li>
+          <li>Compare manual, library-based, and auto-instrumentation approaches</li>
+        </ul>
+
+        <h2 id="prerequisites">Prerequisites</h2>
+        <div class="code-block" data-lang="powershell">
+          <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>py -m pip install -r .\shared-resources\python\requirements.txt
+py -m pip install -r .\shared-resources\python\requirements-auto.txt</code></pre>
+        </div>
+
+        <h2 id="modules">Modules</h2>
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🌐</div>
+            <div class="module-card-title">API Instrumentation</div>
+            <div class="module-card-desc">Flask server spans, distributed tracing, context propagation, exceptions, and status codes.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📚</div>
+            <div class="module-card-title">Library Instrumentation</div>
+            <div class="module-card-desc">Automatic spans from instrumented libraries like requests and Flask.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">⚡</div>
+            <div class="module-card-title">Auto-Instrumentation</div>
+            <div class="module-card-desc">Zero-code instrumentation that wraps your Python app automatically.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📊</div>
+            <div class="module-card-title">Metrics</div>
+            <div class="module-card-desc">Counters, histograms, gauges, and up-down counters for measuring application behavior.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📝</div>
+            <div class="module-card-title">Logging Basics</div>
+            <div class="module-card-desc">Structured logging integrated with OpenTelemetry for correlated log output.</div>
+          </div>
+        </div>
+
+        <h2 id="three-approaches">The Three Instrumentation Approaches</h2>
+        <p>Before diving into the modules, understand the three ways you can instrument an application:</p>
+
+        <div class="diagram-box">
+          <div class="diagram-flow">
+            <div class="diagram-node">🔧 Manual<br><small style="color:var(--text-muted)">Full control, you write every span</small></div>
+            <div class="diagram-arrow">|</div>
+            <div class="diagram-node">📚 Library<br><small style="color:var(--text-muted)">Pre-built spans from instrumented libs</small></div>
+            <div class="diagram-arrow">|</div>
+            <div class="diagram-node">⚡ Auto<br><small style="color:var(--text-muted)">Zero code changes, wraps your app</small></div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 When to use which?</div>
+          <div class="callout-body">
+            <strong>Manual</strong> — when you need custom business spans (e.g. "validate payment").<br>
+            <strong>Library</strong> — when you want automatic spans for HTTP, database, or framework calls.<br>
+            <strong>Auto</strong> — when you want telemetry without changing application code at all.
+          </div>
+        </div>
+
+        <div class="callout callout-tip" style="border-color: var(--accent-purple); background: rgba(123,97,255,0.06);">
+          <div class="callout-title" style="color: var(--accent-purple);">🏆 The "Golden Path" Cheat Sheet</div>
+          <div class="callout-body">
+            Getting stuck on configuration is the #1 reason beginners give up on OTel. Here is the industry-standard "Golden Path" for Python. Always start here:
+            <br><br>
+            <strong>1. Install the CLI & Auto-instrumentation bootstrap:</strong>
+            <pre style="background: var(--bg-code); padding: 12px; border-radius: var(--radius-sm); margin-top: 8px;"><code>pip install opentelemetry-distro opentelemetry-exporter-otlp
+opentelemetry-bootstrap -a install</code></pre>
+            
+            <strong>2. Run your app wrapped in the OTel CLI (Zero Code Changes!):</strong>
+            <pre style="background: var(--bg-code); padding: 12px; border-radius: var(--radius-sm); margin: 8px 0;"><code>export OTEL_SERVICE_NAME="my-awesome-python-app"
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+
+opentelemetry-instrument python my_app.py</code></pre>
+            Only drop down into manual library instrumentation if the Auto-instrumentation doesn't capture the specific business logic you need!
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- API INSTRUMENTATION MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="api-instrumentation">Module: API Instrumentation</h2>
+        <p>These examples build a trace story step by step: instrument a Flask server, connect two services, propagate context, record errors, and observe status-related behavior.</p>
+
+        <h3>Server Setup — Your First Instrumented API</h3>
+        <p>This is a Flask server with manual tracing. The <code>charge.py</code> server creates a span for every incoming request, extracts trace context from headers, and attaches useful attributes:</p>
+
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — charge.py (server)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>from flask import Flask, request
+from opentelemetry.sdk.resources import Resource
+from opentelemetry import trace, context
+from opentelemetry.propagate import extract
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+
+def configure_tracer():
+    exporter = ConsoleSpanExporter()
+    span_processor = BatchSpanProcessor(exporter)
+    resource = Resource.create({
+        "service.name": "Charge service",
+        "service.version": "0.4.0"
+    })
+    provider = TracerProvider(resource=resource)
+    provider.add_span_processor(span_processor)
+    trace.set_tracer_provider(provider)
+    return trace.get_tracer("charge.py", "0.4.0")
+
+tracer = configure_tracer()
+app = Flask(__name__)
+
+# Extract incoming trace context from HTTP headers
+@app.before_request
+def before_request_func():
+    token = context.attach(extract(request.headers))
+    request.environ["context_token"] = token
+
+@app.teardown_request
+def teardown_request_function(err):
+    token = request.environ.get("context_token", None)
+    if token:
+        context.detach(token)
+
+@app.route("/charge")
+@tracer.start_as_current_span("Charge Account", kind=trace.SpanKind.SERVER)
+def charge():
+    span = trace.get_current_span()
+    span.set_attributes({
+        "HTTP_METHOD": request.method,
+        "CLIENT_IP": request.remote_addr,
+        "HTTP_PATH": request.path
+    })
+    span.add_event("User has insufficient Funds, only has $5")
+    return "Charging Users Bank Account"
+
+if __name__ == "__main__":
+    app.run(debug=True)</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🧠 What's happening here?</div>
+          <div class="callout-body">
+            <strong>context.attach(extract(...))</strong> pulls trace context from incoming HTTP headers. This is how the server "joins" an existing trace started by a client.<br><br>
+            <strong>span.set_attributes(...)</strong> attaches metadata to the span. Later, when you view this trace, you'll see the HTTP method, client IP, and path right alongside the timing data.<br><br>
+            <strong>span.add_event(...)</strong> records a timestamped event inside the span — like a structured log entry within the trace.
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">🏷️ OTel Semantic Conventions for HTTP Attributes</div>
+          <div class="callout-body">
+            The example above uses custom uppercase attribute names like <code>"HTTP_METHOD"</code> and <code>"CLIENT_IP"</code> for clarity. In production, use the official OTel semantic conventions:<br><br>
+            <code>"http.request.method"</code> instead of <code>"HTTP_METHOD"</code><br>
+            <code>"url.full"</code> instead of <code>"HTTP_URL"</code><br>
+            <code>"client.address"</code> instead of <code>"CLIENT_IP"</code><br><br>
+            Semantic conventions ensure your attributes match what observability backends expect, enabling automatic dashboards and alerts.
+            <a href="https://opentelemetry.io/docs/specs/semconv/http/" target="_blank" style="color:var(--accent-cyan);">Read the HTTP semantic conventions ↗</a>
+          </div>
+        </div>
+
+        <h3>Distributed Tracing</h3>
+        <div class="callout callout-info">
+          <div class="callout-title">💡 Key Concept</div>
+          <div class="callout-body">Before context propagation, the server and client produce <strong>separate traces</strong>. After propagation, they share the same trace ID — giving you a connected view of the entire request flow.</div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Terminal 1 — Start the server</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-02-instrumentation\api-instrumentation\distributed-tracing\charge.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Terminal 2 — Run the client</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-02-instrumentation\api-instrumentation\distributed-tracing\payment.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3>Context Propagation</h3>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Run with context propagation enabled</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code># Terminal 1
+py .\otel-learning\day-02-instrumentation\api-instrumentation\context-propagation\charge.py
+# Terminal 2
+py .\otel-learning\day-02-instrumentation\api-instrumentation\context-propagation\payment.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3>Expected Output</h3>
+        <div class="terminal-block">
+          <span class="output">• A server span for /charge<br>
+          • Separate traces before propagation<br>
+          • Shared trace IDs after propagation<br>
+          • Span attributes showing HTTP method, path, and client IP</span>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- LIBRARY INSTRUMENTATION MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="library-instrumentation">Module: Library Instrumentation</h2>
+        <p>Instead of manually creating spans for every HTTP call, you can let a <strong>library instrumentor</strong> do it for you. The <code>RequestsInstrumentor</code> automatically creates client spans for every outgoing HTTP request made with the <code>requests</code> library.</p>
+
+        <h3>The Client — payment.py</h3>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — payment.py (library-instrumented client)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>import requests
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
+
+resources = Resource.create({
+    "service.name": "Casher API",
+    "service.version": "0.3.0"
+})
+
+trace.set_tracer_provider(TracerProvider(resource=resources))
+trace.get_tracer_provider().add_span_processor(
+    SimpleSpanProcessor(ConsoleSpanExporter())
+)
+
+# This one line instruments ALL outgoing HTTP requests
+RequestsInstrumentor().instrument()
+
+def charge_bank():
+    print("charging bank")
+    try:
+        url = "http://127.0.0.1:5000/charge"
+        resp = requests.get(url)
+    except Exception as err:
+        print(err)
+
+def main():
+    print("Calling bank charger...")
+    charge_bank()
+    print("Done! Charging bank done...")
+
+if __name__ == "__main__":
+    main()</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🧠 What's the difference from manual?</div>
+          <div class="callout-body">
+            With <strong>manual instrumentation</strong> (Day 1), you wrote <code>tracer.start_as_current_span("...")</code> around every operation.<br><br>
+            With <strong>library instrumentation</strong>, you call <code>RequestsInstrumentor().instrument()</code> <em>once</em>, and every HTTP call made with <code>requests.get()</code> automatically gets a span with HTTP method, URL, status code, and timing — no extra code needed per request.
+          </div>
+        </div>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Start the charge server</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-02-instrumentation\library-instrumentation\charge.py</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>In another terminal, run the client</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-02-instrumentation\library-instrumentation\payment.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3>Expected Output</h3>
+        <div class="terminal-block">
+          <span class="output">Calling bank charger...<br>
+          charging bank<br>
+          Done! Charging bank done...<br><br>
+          # A client span is automatically created for the GET request:<br>
+          {<br>
+          &nbsp;&nbsp;"name": "GET",<br>
+          &nbsp;&nbsp;"kind": "SpanKind.CLIENT",<br>
+          &nbsp;&nbsp;"attributes": {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"http.method": "GET",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"http.url": "http://127.0.0.1:5000/charge",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"http.status_code": 200<br>
+          &nbsp;&nbsp;}<br>
+          }</span>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- AUTO-INSTRUMENTATION MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="auto-instrumentation">Module: Auto-Instrumentation</h2>
+        <p>Auto-instrumentation is the <strong>zero-code approach</strong>. You don't add any OpenTelemetry imports or tracer setup to your application. Instead, you wrap the app at startup using a command-line tool.</p>
+
+        <h3>The Application — No OTel Code!</h3>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — products.py (plain Flask, no OTel code)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def charge():
+    return "Here are all of the available products"
+
+if __name__ == "__main__":
+    app.run(debug=False, use_reloader=False)</code></pre>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">⚠️ Notice!</div>
+          <div class="callout-body">There are <strong>zero OpenTelemetry imports</strong> in this file. The app is completely unaware of tracing. All instrumentation happens externally at startup.</div>
+        </div>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Install instrumentors automatically</h4>
+            <p>This command scans your installed packages and installs matching OpenTelemetry instrumentors:</p>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>opentelemetry-bootstrap -a install</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Start the app with auto-instrumentation</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>opentelemetry-instrument --traces_exporter console --metrics_exporter console --service_name products py .\otel-learning\day-02-instrumentation\auto-instrumentation\products.py</code></pre>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Send a request</h4>
+            <p>Open <a href="http://127.0.0.1:5000/" target="_blank">http://127.0.0.1:5000/</a> in your browser and check the terminal for trace output.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 CLI vs Environment Variables</div>
+          <div class="callout-body">
+            You can configure auto-instrumentation via CLI flags or environment variables:<br><br>
+            <code>--traces_exporter</code> → <code>OTEL_TRACES_EXPORTER</code><br>
+            <code>--metrics_exporter</code> → <code>OTEL_METRICS_EXPORTER</code><br>
+            <code>--service_name</code> → <code>OTEL_SERVICE_NAME</code><br>
+            <code>--exporter_otlp_endpoint</code> → <code>OTEL_EXPORTER_OTLP_ENDPOINT</code><br><br>
+            <strong>Note:</strong> With env vars, the /v1/traces path is <em>not</em> auto-appended — you must configure it manually.
+          </div>
+        </div>
+
+        <h3>Expected Output</h3>
+        <div class="terminal-block">
+          <span class="output">{<br>
+          &nbsp;&nbsp;"name": "GET /",<br>
+          &nbsp;&nbsp;"context": {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"trace_id": "0x694332e6eec1954dd99b58e14c449774",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"span_id": "0x9a44ec0893b21fc5"<br>
+          &nbsp;&nbsp;},<br>
+          &nbsp;&nbsp;"kind": "SpanKind.SERVER",<br>
+          &nbsp;&nbsp;"status": { "status_code": "UNSET" }<br>
+          }</span>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- METRICS MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="metrics">Module: Metrics</h2>
+        <p>Metrics answer <strong>"how much, how often, how fast?"</strong> OpenTelemetry provides four core metric instruments. Each is designed for a different measurement pattern:</p>
+
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🔢</div>
+            <div class="module-card-title">Counter</div>
+            <div class="module-card-desc">Always goes up — track total requests, orders placed, errors. <code>counter.add(1)</code></div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">↕️</div>
+            <div class="module-card-title">Up-Down Counter</div>
+            <div class="module-card-desc">Can go up or down — track queue sizes, concurrent connections. <code>counter.add(-1)</code></div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📊</div>
+            <div class="module-card-title">Histogram</div>
+            <div class="module-card-desc">Measures distributions — request duration, payload sizes. <code>histogram.record(42.5)</code></div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📡</div>
+            <div class="module-card-title">Observable Gauge</div>
+            <div class="module-card-desc">Snapshot values via callbacks — memory usage, CPU, temperature. Reads value periodically.</div>
+          </div>
+        </div>
+
+        <h3>Try the Examples</h3>
+        <div class="code-block" data-lang="powershell">
+          <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code># Counter basics — count requests by route and method
+py .\otel-learning\day-02-instrumentation\metrics\counter-basics\main.py
+
+# Observable gauge — snapshot memory usage periodically
+py .\otel-learning\day-02-instrumentation\metrics\async-gauge\main.py
+
+# Up-down counter — track queue size going up and down
+py .\otel-learning\day-02-instrumentation\metrics\up-down-counter\main.py
+
+# Histogram — measure request latency distributions
+py .\otel-learning\day-02-instrumentation\metrics\histogram\main.py
+
+# Cumulative metrics — observe metric accumulation over time
+py .\otel-learning\day-02-instrumentation\metrics\cumulative-metrics\main.py</code></pre>
+        </div>
+
+        <h3>Expected Output</h3>
+        <div class="terminal-block">
+          <span class="output">• Periodic metric exports every few seconds<br>
+          • Request counts grouped by route and method<br>
+          • Histogram buckets for request duration<br>
+          • Memory usage readings from the gauge callback</span>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">⏱️ No output appearing?</div>
+          <div class="callout-body">Metrics are exported on an interval (typically every 5-10 seconds). Wait a moment — unlike spans which export as they complete, metrics batch on a timer.</div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- LOGGING MODULE -->
+        <!-- ============================================ -->
+
+        <h2 id="logging-basics">Module: Logging Basics</h2>
+        <p>OpenTelemetry can capture your existing Python logs and export them as structured telemetry. This means your familiar <code>logging.info("...")</code> calls can be enriched with trace context and sent to observability backends.</p>
+
+        <h3>The Code</h3>
+        <div class="code-block" data-lang="python">
+          <div class="code-header"><span class="code-lang">python — main.py (OTel logging)</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>import logging
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry._logs import set_logger_provider, get_logger
+from opentelemetry.sdk._logs.export import ConsoleLogExporter, BatchLogRecordProcessor
+
+# 1. Create a logger provider (like TracerProvider, but for logs)
+logger_provider = LoggerProvider()
+
+# 2. Create an exporter (console for learning, OTLP for production)
+exporter = ConsoleLogExporter()
+
+# 3. Create a processor that batches log records
+processor = BatchLogRecordProcessor(
+    exporter=exporter,
+    export_timeout_millis=5000
+)
+
+# 4. Wire it all together
+logger_provider.add_log_record_processor(processor)
+set_logger_provider(logger_provider=logger_provider)
+
+# 5. Bridge Python's standard logging to OTel
+handler = LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider)
+logging.basicConfig(handlers=[handler], level=logging.NOTSET)
+
+# Now standard Python logs flow through OpenTelemetry!
+def book_flight():
+    logging.info("Starting the booking flight process")
+    search_flights()
+    reserve_flight()
+
+def search_flights():
+    logging.info("Searching for flights")
+
+def reserve_flight():
+    logging.warning("Reserving flight")
+
+if __name__ == "__main__":
+    book_flight()</code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 The Pattern: Provider → Processor → Exporter</div>
+          <div class="callout-body">
+            Notice the same pattern as tracing?<br>
+            <strong>Traces:</strong> TracerProvider → SpanProcessor → SpanExporter<br>
+            <strong>Logs:</strong> LoggerProvider → LogRecordProcessor → LogExporter<br>
+            <strong>Metrics:</strong> MeterProvider → MetricReader → MetricExporter<br><br>
+            OTel uses the same architecture for all three signals. Learn it once, apply everywhere.
+          </div>
+        </div>
+
+        <h3>Step-by-Step</h3>
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Run the logging example</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-02-instrumentation\logging-basics\main.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3>Expected Output</h3>
+        <div class="terminal-block">
+          <span class="output">• Log messages for booking, searching, and reservation events<br>
+          • Console output with structured log records including timestamps and severity<br>
+          • Each log record contains body, severity_text, and severity_number</span>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- TROUBLESHOOTING -->
+        <!-- ============================================ -->
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            🔧 Troubleshooting
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <ul>
+              <li>Run one service per terminal window for client/server examples.</li>
+              <li>If port <code>5000</code> is busy, stop the existing Flask app before starting another example.</li>
+              <li>Start the <code>charge.py</code> service before the <code>payment.py</code> client.</li>
+              <li>If requests fail, confirm the server is listening on <code>127.0.0.1:5000</code>.</li>
+              <li>If <code>opentelemetry-instrument</code> is not recognized, reopen the terminal after installing.</li>
+              <li>If metrics don't appear, wait for the export interval (typically 5-10 seconds).</li>
+              <li>If <code>psutil</code> import fails, reinstall the shared requirements.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="checklist">Readiness Checklist</h2>
+        <ul class="checklist">
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-flask">
+            <label for="day2-flask">I can instrument a Flask endpoint with spans</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-distributed">
+            <label for="day2-distributed">I understand disconnected vs connected traces</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-context">
+            <label for="day2-context">I can explain what context propagation does</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-library">
+            <label for="day2-library">I understand how RequestsInstrumentor works</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-auto">
+            <label for="day2-auto">I can run a Flask app with auto-instrumentation</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-metrics">
+            <label for="day2-metrics">I know the difference between counters, histograms, and gauges</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-logging">
+            <label for="day2-logging">I can route Python logs through OpenTelemetry</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day2-approaches">
+            <label for="day2-approaches">I can compare manual, library, and auto instrumentation</label>
+          </li>
+        </ul>
+      </div>
+
+      <nav class="page-nav">
+        <a href="day-01.html" class="page-nav-link prev">
+          <span class="page-nav-label">← Previous</span>
+          <span class="page-nav-title">Day 1 — OTel Basics</span>
+        </a>
+        <a href="day-03.html" class="page-nav-link next">
+          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-title">Day 3 — Collector</span>
+        </a>
+      </nav>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>

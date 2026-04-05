@@ -1,0 +1,164 @@
+python main.py
+D:\OTelInstrumentation\day-04\IntegratingTracesWithLogs\main.py: 23: DeprecationWarning: Use ConsoleLogRecordExporter. Since logs are not stable yet this WILL be removed in future releases.
+  exporter = ConsoleLogExporter()  # Deprecated
+{
+    "name": "Search Flight",
+    "context": {
+        "trace_id": "0x0636217e721280a99c7b6c567cc8f790",
+        "span_id": "0x30e4098479ba84d8",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": "0x9d26464fd069de9a",
+    "start_time": "2026-02-15T09:50:11.618209Z",
+    "end_time": "2026-02-15T09:50:11.618209Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+D:\OTelInstrumentation\day-04\IntegratingTracesWithLogs\main.py: 53: DeprecationWarning: The 'warn' function is deprecated, use 'warning' instead
+  logging.warn("Reserving flight")
+{
+    "name": "Reserver Flight",
+    "context": {
+        "trace_id": "0x0636217e721280a99c7b6c567cc8f790",
+        "span_id": "0x760bdd44e91fbfe2",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": "0x9d26464fd069de9a",
+    "start_time": "2026-02-15T09:50:11.619210Z",
+    "end_time": "2026-02-15T09:50:11.619892Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "Book Flight",
+    "context": {
+        "trace_id": "0x0636217e721280a99c7b6c567cc8f790",
+        "span_id": "0x9d26464fd069de9a",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-02-15T09:50:11.618209Z",
+    "end_time": "2026-02-15T09:50:11.620115Z",
+    "status": {
+        "status_code": "UNSET"
+    },
+    "attributes": {},
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "body": "INFO:root:Strating the booking flight process",
+    "severity_number": 9,
+    "severity_text": "INFO",
+    "attributes": {
+        "code.file.path": "D:\\OTelInstrumentation\\day-04\\IntegratingTracesWithLogs\\main.py",
+        "code.function.name": "book_flight",
+        "code.line.number": 41
+    },
+    "dropped_attributes": 0,
+    "timestamp": "2026-02-15T09:50:11.618209Z",
+    "observed_timestamp": "2026-02-15T09:50:11.618209Z",
+    "trace_id": "0x0636217e721280a99c7b6c567cc8f790",
+    "span_id": "0x9d26464fd069de9a",
+    "trace_flags": 1,
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    },
+    "event_name": ""
+}
+{
+    "body": "INFO:root:Searching for flights",
+    "severity_number": 9,
+    "severity_text": "INFO",
+    "attributes": {
+        "code.file.path": "D:\\OTelInstrumentation\\day-04\\IntegratingTracesWithLogs\\main.py",
+        "code.function.name": "search_flights",
+        "code.line.number": 47
+    },
+    "dropped_attributes": 0,
+    "timestamp": "2026-02-15T09:50:11.618209Z",
+    "observed_timestamp": "2026-02-15T09:50:11.618209Z",
+    "trace_id": "0x0636217e721280a99c7b6c567cc8f790",
+    "span_id": "0x30e4098479ba84d8",
+    "trace_flags": 1,
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    },
+    "event_name": ""
+}
+{
+    "body": "WARNING:root:Reserving flight",
+    "severity_number": 13,
+    "severity_text": "WARN",
+    "attributes": {
+        "code.file.path": "D:\\OTelInstrumentation\\day-04\\IntegratingTracesWithLogs\\main.py",
+        "code.function.name": "reserve_flight",
+        "code.line.number": 53
+    },
+    "dropped_attributes": 0,
+    "timestamp": "2026-02-15T09:50:11.619892Z",
+    "observed_timestamp": "2026-02-15T09:50:11.619892Z",
+    "trace_id": "0x0636217e721280a99c7b6c567cc8f790",
+    "span_id": "0x760bdd44e91fbfe2",
+    "trace_flags": 1,
+    "resource": {
+        "attributes": {
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": "1.39.1",
+            "service.name": "unknown_service"
+        },
+        "schema_url": ""
+    },
+    "event_name": ""
+}

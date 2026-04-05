@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 3 — Collector Deep Dive | OTel Learning</title>
+  <meta name="description" content="Learn the OpenTelemetry Collector — receivers, processors, exporters, and pipelines. Read real YAML configs, start the Collector with Docker, and understand how telemetry flows through the Collector.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔭</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="header-logo"><span class="logo-icon">🔭</span><span>OTel Learning</span></a>
+    <nav class="header-nav">
+      <a href="index.html">Home</a><a href="quick-start.html">Quick Start</a>
+      <a href="day-00.html" class="active">Days</a><a href="https://github.com" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Learning Path</div>
+      <a href="day-00.html" class="sidebar-link" data-day="0"><span class="day-badge">0</span><span>Foundations</span><span class="check-icon">✓</span></a>
+      <a href="day-01.html" class="sidebar-link" data-day="1"><span class="day-badge">1</span><span>OTel Basics</span><span class="check-icon">✓</span></a>
+      <a href="day-02.html" class="sidebar-link" data-day="2"><span class="day-badge">2</span><span>Instrumentation</span><span class="check-icon">✓</span></a>
+      <a href="day-03.html" class="sidebar-link active" data-day="3"><span class="day-badge">3</span><span>Collector</span><span class="check-icon">✓</span></a>
+      <a href="day-04.html" class="sidebar-link" data-day="4"><span class="day-badge">4</span><span>Exporters</span><span class="check-icon">✓</span></a>
+      <a href="day-05.html" class="sidebar-link" data-day="5"><span class="day-badge">5</span><span>Pipelines</span><span class="check-icon">✓</span></a>
+      <a href="day-06.html" class="sidebar-link" data-day="6"><span class="day-badge">6</span><span>OTCA Concepts</span><span class="check-icon">✓</span></a>
+      <a href="day-07.html" class="sidebar-link" data-day="7"><span class="day-badge">7</span><span>Mini Project</span><span class="check-icon">✓</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Resources</div>
+      <a href="quick-start.html" class="sidebar-link"><span class="day-badge">⚡</span><span>Quick Start</span></a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+
+      <div class="page-header">
+        <div class="page-breadcrumb">
+          <a href="index.html">Home</a> <span>/</span> <span>Day 3</span>
+        </div>
+        <div class="page-day-label day-3">Day 3 — Deep Dive</div>
+        <h1 class="page-title">Collector Deep Dive</h1>
+        <p class="page-description">
+          Until now, your apps exported telemetry straight to the console. 
+          The Collector adds a production-grade control point between your app and your backends — 
+          one place to receive, process, filter, and route all your signals.
+        </p>
+        <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <span style="font-size:0.78rem;color:var(--text-muted);background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);padding:4px 12px;border-radius:100px;">⏱ ~45 min hands-on</span>
+          <span style="font-size:0.78rem;color:var(--accent-pink);background:rgba(247,37,133,0.08);border:1px solid rgba(247,37,133,0.2);padding:4px 12px;border-radius:100px;">💓 Intermediate</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <h2 id="learning-outcomes">Learning Outcomes</h2>
+        <ul>
+          <li>Explain why the Collector exists and what problem it solves</li>
+          <li>Understand receivers, processors, exporters, and service pipelines</li>
+          <li>Read and write a Collector config YAML</li>
+          <li>Start the Collector with Docker and verify telemetry flows through it</li>
+        </ul>
+
+        <!-- ============================================ -->
+        <!-- WHY THE COLLECTOR -->
+        <!-- ============================================ -->
+
+        <h2 id="why-collector">Why the Collector?</h2>
+        <p>A common beginner question: <em>"If I can just send OTLP data directly from my Python code to Jaeger, why do I need to set up this complex Collector middleware?"</em></p>
+        <p>While direct-to-backend works for simple tutorials, in production the Collector is vital because it:</p>
+        <ul>
+          <li><strong>Offloads work:</strong> It handles retries, batching, and encryption so your app doesn't waste CPU/memory doing it.</li>
+          <li><strong>Abstracts vendors:</strong> Your app only talks to the Collector. If you switch from Datadog to Grafana tomorrow, you only change the Collector config, not your app code.</li>
+          <li><strong>Secures credentials:</strong> API keys for your observability SaaS live in the Collector, not inside your application's environment variables.</li>
+        </ul>
+
+        <div class="diagram-box">
+          <div class="diagram-flow">
+            <div class="diagram-node">🖥️ Your App<br><small style="color:var(--text-muted)">OTLP out</small></div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">📦 Collector<br><small style="color:var(--text-muted)">receive, process, route</small></div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">🗄️ Backends<br><small style="color:var(--text-muted)">Jaeger, Grafana, etc.</small></div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">💡 One app, many backends</div>
+          <div class="callout-body">Your app always speaks OTLP to the Collector. The Collector decides where to send data — Jaeger for traces, Prometheus for metrics, Loki for logs. You never need to change your application code when switching backends.</div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- ARCHITECTURE -->
+        <!-- ============================================ -->
+
+        <h2 id="architecture">Collector Architecture</h2>
+        <p>Every Collector config is built from four section types. A <strong>pipeline</strong> is just a named combination of receivers → processors → exporters for one signal type.</p>
+
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">📥</div>
+            <div class="module-card-title">Receivers</div>
+            <div class="module-card-desc">Listen for incoming telemetry. OTLP receiver accepts gRPC on port 4317 and HTTP on port 4318.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">⚙️</div>
+            <div class="module-card-title">Processors</div>
+            <div class="module-card-desc">Transform, filter, or batch telemetry before export. The <code>batch</code> processor groups spans to reduce network calls.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📤</div>
+            <div class="module-card-title">Exporters</div>
+            <div class="module-card-desc">Send telemetry to a backend. The <code>debug</code> exporter prints to the Collector's own stdout — great for learning.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🔗</div>
+            <div class="module-card-title">Service Pipelines</div>
+            <div class="module-card-desc">Wire receivers → processors → exporters together per signal type: traces, metrics, and logs each get their own pipeline.</div>
+          </div>
+        </div>
+
+        <div class="diagram-box">
+          <div class="diagram-flow">
+            <div class="diagram-node">📥 Receiver<br><small style="color:var(--text-muted)">otlp</small></div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">⚙️ Processor<br><small style="color:var(--text-muted)">batch</small></div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">📤 Exporter<br><small style="color:var(--text-muted)">debug</small></div>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- THE CONFIG FILES -->
+        <!-- ============================================ -->
+
+        <h2 id="config-files">The Config Files</h2>
+        <p>The shared collector directory contains two configs. Start with the minimal one to understand the bare structure, then move to the debug config which adds the <code>batch</code> processor:</p>
+
+        <h3>Minimal Config — collector-config-minimal.yaml</h3>
+        <p>The simplest possible Collector: one OTLP receiver, no processors, and the debug exporter printing every signal to stdout. Good for first-time verification that telemetry arrives.</p>
+        <div class="code-block" data-lang="yaml">
+          <div class="code-header"><span class="code-lang">yaml — collector-config-minimal.yaml</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317   # gRPC — binary protocol
+      http:
+        endpoint: 0.0.0.0:4318   # HTTP — works through proxies
+
+processors:
+  # None — data flows straight through
+
+exporters:
+  debug:
+    verbosity: detailed           # Prints full telemetry to Collector stdout
+
+service:
+  pipelines:
+    traces:                       # One pipeline per signal type
+      receivers: [otlp]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      exporters: [debug]
+    logs:
+      receivers: [otlp]
+      exporters: [debug]</code></pre>
+        </div>
+
+        <h3>Debug Config — collector-config-debug.yaml</h3>
+        <p>Adds the <code>batch</code> processor to each pipeline. Instead of forwarding each span individually, the Collector waits to accumulate a batch and sends them together. This is much more efficient for production workloads.</p>
+        <div class="code-block" data-lang="yaml">
+          <div class="code-header"><span class="code-lang">yaml — collector-config-debug.yaml</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:                          # Buffers and batches spans before export
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]         # Added: spans are batched here
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🧠 Reading the config: top-down vs service section</div>
+          <div class="callout-body">
+            The top of the config defines <em>available</em> components (what is declared). The <code>service.pipelines</code> section defines what is actually <em>active</em>. You can declare a receiver or exporter and never wire it into a pipeline — it simply won't run. This is useful for staging config changes.
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- DOCKER COMPOSE -->
+        <!-- ============================================ -->
+
+        <h2 id="docker-setup">Docker Setup</h2>
+        <p>The Collector runs as a Docker container. The compose file in <code>shared-resources/collector/</code> maps the standard OTLP ports and mounts the config file:</p>
+
+        <div class="code-block" data-lang="yaml">
+          <div class="code-header"><span class="code-lang">yaml — docker-compose.yaml</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./collector-config-debug.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"   # gRPC
+      - "4318:4318"   # HTTP</code></pre>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- STEP BY STEP -->
+        <!-- ============================================ -->
+
+        <h2 id="step-by-step">Step-by-Step</h2>
+
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-body">
+            <h4>Start the Collector</h4>
+            <p>Run from the repository root. Docker Desktop must be running.</p>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>docker compose -f .\shared-resources\collector\docker-compose.yaml up -d</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-body">
+            <h4>Verify the container is running</h4>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>docker ps</code></pre>
+            </div>
+            <p>You should see an <code>otel-collector</code> container with ports <code>4317</code> and <code>4318</code> mapped.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-body">
+            <h4>Send telemetry to the Collector</h4>
+            <p>Re-run any OTLP example from Day 4 or the shopping cart from Day 7 — both target <code>localhost:4318</code> which the Collector is now listening on:</p>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>py .\otel-learning\day-04-exporters\otlp-exporting\main.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <div class="step-body">
+            <h4>Inspect the Collector logs</h4>
+            <p>The debug exporter prints full telemetry to stdout. You'll see span names, attributes, trace IDs, and timestamps:</p>
+            <div class="code-block" data-lang="powershell">
+              <div class="code-header"><span class="code-lang">powershell</span><button class="code-copy-btn">Copy</button></div>
+              <pre><code>docker logs otel-collector</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- EXPECTED OUTPUT -->
+        <!-- ============================================ -->
+
+        <h2 id="expected-output">Expected Output</h2>
+
+        <h3>docker ps</h3>
+        <div class="terminal-block">
+          <span class="prompt">$</span> docker ps<br>
+          <span class="output">CONTAINER ID   IMAGE                                        STATUS    PORTS<br>
+          a1b2c3d4e5f6   otel/opentelemetry-collector-contrib:latest   Up        0.0.0.0:4317->4317/tcp, 0.0.0.0:4318->4318/tcp</span>
+        </div>
+
+        <h3>docker logs otel-collector (after sending traces)</h3>
+        <div class="terminal-block">
+          <span class="output">2024-01-15T10:30:00.000Z info  ResourceSpans #0<br>
+          Resource SchemaURL:<br>
+          Resource attributes:<br>
+               -> service.name: Str(Shopping Cart Service)<br>
+               -> service.version: Str(0.2.0)<br>
+          ScopeSpans #0<br>
+          ScopeSpans SchemaURL:<br>
+          InstrumentationScope shopping-cart 0.2.0<br>
+          Span #0<br>
+               Trace ID       : a3c5f2e8d9b14f6a<br>
+               Parent ID      :<br>
+               ID             : 7b2e9d4c1a8f3e5b<br>
+               Name           : Create Order<br>
+               Kind           : Internal<br>
+               Start time     : 2024-01-15 10:30:00<br>
+               End time       : 2024-01-15 10:30:00.025<br>
+          Span #1<br>
+               Trace ID       : a3c5f2e8d9b14f6a<br>
+               Parent ID      : 7b2e9d4c1a8f3e5b<br>
+               Name           : Validate Order<br>
+               Kind           : Internal</span>
+        </div>
+
+        <div class="callout callout-tip">
+          <div class="callout-title">🔍 What to look for in the logs</div>
+          <div class="callout-body">
+            <strong>Trace ID</strong> — all spans from the same trace share this value<br>
+            <strong>Parent ID</strong> — empty on root spans; set to parent span's ID for children<br>
+            <strong>service.name</strong> — comes from the <code>Resource</code> you set in your app<br>
+            <strong>Verbosity: detailed</strong> — the debug exporter shows every attribute and event
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- CONFIG ANATOMY -->
+        <!-- ============================================ -->
+
+        <h2 id="config-anatomy">Config Section Anatomy</h2>
+        <p>Every component in the config follows the same pattern: <strong>declare it</strong> in its section, then <strong>reference it</strong> in a pipeline. Here's what each receiver and exporter key means:</p>
+
+        <div class="modules-grid">
+          <div class="module-card">
+            <div class="module-card-icon">🔌</div>
+            <div class="module-card-title">receivers.otlp</div>
+            <div class="module-card-desc">Activates the OTLP receiver. Sub-keys <code>grpc</code> and <code>http</code> define the protocols and bind addresses.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🔄</div>
+            <div class="module-card-title">processors.batch</div>
+            <div class="module-card-desc">Groups spans into batches for efficient export. Default: sends when batch reaches 512 items or every 5 seconds (5000ms), whichever comes first.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">🖨️</div>
+            <div class="module-card-title">exporters.debug</div>
+            <div class="module-card-desc">Prints telemetry to the Collector's own log output. <code>verbosity: detailed</code> shows full span data including all attributes.</div>
+          </div>
+          <div class="module-card">
+            <div class="module-card-icon">📋</div>
+            <div class="module-card-title">service.pipelines</div>
+            <div class="module-card-desc">One section per signal type. Each pipeline names which receivers, processors, and exporters to chain together for that signal.</div>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <button class="collapsible-trigger">
+            🔧 Troubleshooting
+            <span class="arrow">▶</span>
+          </button>
+          <div class="collapsible-content">
+            <ul>
+              <li>If <code>docker compose up</code> fails, make sure Docker Desktop is running first.</li>
+              <li>If port 4317 or 4318 is already in use, stop any previously running Collector container: <code>docker stop otel-collector</code>.</li>
+              <li>If your app exits without sending data, it may be using <code>SimpleSpanProcessor</code> which exports synchronously — the Collector needs to be running <em>before</em> the app starts.</li>
+              <li>If you see no output in <code>docker logs</code>, check that your app's OTLP endpoint matches — it must be <code>http://localhost:4318/v1/traces</code> (HTTP) or <code>localhost:4317</code> (gRPC).</li>
+              <li>Inspect detailed Collector startup logs: <code>docker logs otel-collector 2>&1 | head -40</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="checklist">Readiness Checklist</h2>
+        <ul class="checklist">
+          <li class="checklist-item">
+            <input type="checkbox" id="day3-docker">
+            <label for="day3-docker">I can start the Collector with Docker and see it running in <code>docker ps</code></label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day3-components">
+            <label for="day3-components">I can name the four Collector building blocks: receivers, processors, exporters, service pipelines</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day3-yaml">
+            <label for="day3-yaml">I can read a Collector config YAML and explain what each section does</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day3-pipeline">
+            <label for="day3-pipeline">I understand how a pipeline wires receiver → processor → exporter for one signal type</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day3-ports">
+            <label for="day3-ports">I know that port 4317 is gRPC and port 4318 is HTTP for OTLP</label>
+          </li>
+          <li class="checklist-item">
+            <input type="checkbox" id="day3-logs">
+            <label for="day3-logs">I can inspect received telemetry in Collector logs using <code>docker logs otel-collector</code></label>
+          </li>
+        </ul>
+      </div>
+
+      <nav class="page-nav">
+        <a href="day-02.html" class="page-nav-link prev">
+          <span class="page-nav-label">← Previous</span>
+          <span class="page-nav-title">Day 2 — Instrumentation</span>
+        </a>
+        <a href="day-04.html" class="page-nav-link next">
+          <span class="page-nav-label">Next →</span>
+          <span class="page-nav-title">Day 4 — Exporters</span>
+        </a>
+      </nav>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/code-highlight.js"></script>
+</body>
+</html>
